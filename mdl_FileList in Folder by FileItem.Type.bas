@@ -73,7 +73,7 @@ Function ImportDirListing(strPath As String, Optional strFilter As String)
      
     Dim MyFile  As String
     Dim db      As DAO.Database
-    Dim sSQL    As String
+    Dim sSQL    As String ' SQL INSERT statement where the directory listing data should be output to (here it is 'DirectoryListing')
      
     Set db = CurrentDb()
      
@@ -105,8 +105,5 @@ Error_Handler:
                "Error Description: " & ERR.Description, vbCritical, _
                "An Error has Occurred!"
         Resume Error_Handler_Exit
+
 End Function
-
-
-
-

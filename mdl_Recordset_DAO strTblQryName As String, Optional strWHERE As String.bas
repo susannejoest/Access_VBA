@@ -1,5 +1,5 @@
-Attribute VB_Name = "mdl_Recordset"
-Option Compare Database
+'Attribute VB_Name = "mdl_Recordset"
+'Option Compare Database
 
 Function fct_DAORecordSet_TblQry(strTblQryName As String, Optional strWHERE As String)
 

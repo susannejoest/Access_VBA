@@ -1,22 +1,14 @@
-Attribute VB_Name = "mdl_SharepointUpload"
-Option Compare Database
+'Attribute VB_Name = "mdl_SharepointUpload"
+'Option Compare Database
 
 Public Function fct_UploadToSharepoint(strSourcePathAndFullFileName As String, strTargetFileNameNoPath As String, strSharepointUploadLibraryAddress As String) As Boolean
 
-'strWBTarget_Confidential = strReportPath & strSharepointRestrictedAreaDS_FileName
-    'strSharepointRestrictedAreaDS_FileName = "DataSheet_Confidential_MonthEnd_" & datYYYY_MM & ".xlsm"
-'strSharepointRestrictedAreaDS_FileName = "DataSheet_Confidential_MonthEnd_" & datYYYY_MM & ".xlsm"
-'strSharepointRestrictedAreaDS_Url = "https://mytakeda.sharepoint.com/teams/LegalCorporateDataSheet/CorporateDataSheet_Confidential/"
-
-'If fct_UploadToSharepoint(strWBTarget_Confidential, strSharepointRestrictedAreaDS_FileName, strSharepointRestrictedAreaDS_Url)
-
+'file share A: is temporarily mapped as a workaround
 
 On Error GoTo Err_fct_UploadToSharepoint
-    Dim objNet As Object
-    Dim FS As Object
-    
-    'strSharepointAddress = "https://abc.onmicrosoft.com/TargetFolder/"
-    'strLocalAddress = "c: MyWorkFiletoCopy.xlsx"
+    Dim objNet As Object 'CreateObject("WScript.Network")
+    Dim FS As Object ' CreateObject("Scripting.FileSystemObject")
+ 
     Set objNet = CreateObject("WScript.Network")
     Set FS = CreateObject("Scripting.FileSystemObject")
     objNet.MapNetworkDrive "A:", strSharepointUploadLibraryAddress

@@ -1,3 +1,6 @@
+Private Declare PtrSafe Function apiGetUserName Lib "advapi32.dll" Alias _
+"GetUserNameA" (ByVal lpBuffer As String, nSize As Long) As Long
+
 Public Function fct_apiGetUserName() As String
 
     ' Returns the network login name

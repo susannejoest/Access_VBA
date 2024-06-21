@@ -5,10 +5,6 @@ Option Compare Database
 Private Declare PtrSafe Function apiGetComputerName Lib "kernel32" Alias _
 "GetComputerNameA" (ByVal lpBuffer As String, nSize As Long) As Long
 
-Public Declare PtrSafe Function Sleep Lib "kernel32" ( _
-ByVal dwMilliseconds As Long)  ' for zipping function
-
-
 Public Function fOSMachineName() As String
 'Returns the computername
 Dim lngLen As Long, lngX As Long

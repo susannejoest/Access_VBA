@@ -68,16 +68,7 @@ err_handler:
 End Function
 
 Function ImportDirListing(strPath As String, Optional strFilter As String)
-    ' Author: CARDA Consultants Inc, 2007-01-19
-    ' Copyright : The following may be altered and reused as you wish so long as the
-    '             copyright notice is left unchanged (including Author, Website and
-    '             Copyright).  It may not be sold/resold or reposted on other sites (links
-    '              back to this site are allowed).
-    '
-    ' strPath = full path include trailing  ie:"c:windows"
-    ' strFilter = extension of files ie:"pdf".  if you want to return
-    '             a complete listing of all the files enter a value of
-    '             "*" as the strFilter
+
     On Error GoTo Error_Handler
      
     Dim MyFile  As String
@@ -98,8 +89,7 @@ Function ImportDirListing(strPath As String, Optional strFilter As String)
         'Debug.Print MyFile
         sSQL = "INSERT INTO DirectoryListing (File_Name) VALUES(""" & MyFile & """)"
         db.Execute sSQL, dbFailOnError
-        'dbs.RecordsAffected 'could be used to validate that the
-                                        'query actually worked
+        'dbs.RecordsAffected 'could be used to validate that the query worked
         MyFile = Dir$
     Loop
      

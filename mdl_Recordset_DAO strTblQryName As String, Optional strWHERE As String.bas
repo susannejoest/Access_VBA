@@ -13,8 +13,8 @@ strSQL = "SELECT * FROM " & strTblQryName & IIf(strWHERE > "", " WHERE " & strWH
          
      Do Until rs.EOF
          Debug.Print rs(1).Value
-         'rs!ArtikelID
-         'rs![Field With Space]
+         'rs!FieldID
+         'rs![Field Name]
          
 lblMoveNext:
          rs.MoveNext
@@ -32,7 +32,7 @@ err_handler:
         Select Case ERR.Number
             Case 0
             Case Else
-            MsgBox "Unhandled Error in fct_Recordset: " & ERR.Number & " " & ERR.Description
+            MsgBox "Unhandled Error in Recordset function: " & ERR.Number & " " & ERR.Description
                 Stop
         End Select
     End If

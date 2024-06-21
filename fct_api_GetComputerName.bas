@@ -5,9 +5,6 @@ Option Compare Database
 Private Declare PtrSafe Function apiGetComputerName Lib "kernel32" Alias _
 "GetComputerNameA" (ByVal lpBuffer As String, nSize As Long) As Long
 
-Private Declare PtrSafe Function apiGetUserName Lib "advapi32.dll" Alias _
-"GetUserNameA" (ByVal lpBuffer As String, nSize As Long) As Long
-
 Public Declare PtrSafe Function Sleep Lib "kernel32" ( _
 ByVal dwMilliseconds As Long)  ' for zipping function
 
@@ -24,4 +21,5 @@ fOSMachineName = Left$(strCompName, lngLen)
 Else
 fOSMachineName = ""
 End If
+
 End Function

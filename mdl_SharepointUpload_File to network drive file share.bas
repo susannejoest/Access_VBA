@@ -21,7 +21,7 @@ lblUpload:
         FS.CopyFile strSourcePathAndFullFileName, "A:" & strTargetFileNameNoPath, True 'True = overwrite yes, otherwise it will not overwrite if false
     End If
      
-    fct_UploadToSharepoint = True
+    fct_UploadToSharepoint = True ' function succeeded
 
 lblCleanup:
     objNet.RemoveNetworkDrive "A:" 'if this is not removed then there will be an error next time this function runs so the cleanup must run in any case

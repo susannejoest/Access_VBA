@@ -1,3 +1,6 @@
+Public Declare PtrSafe Function Sleep Lib "kernel32" ( _
+ByVal dwMilliseconds As Long)  ' for zipping function
+
 Function fct_ZipSingleFile(ZipFile As String, InputFile As String)
 ' must include mdl_apiFunctions Private Declare Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long)
 

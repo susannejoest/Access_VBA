@@ -1,3 +1,6 @@
+ lastRefreshDate = Application.Run("SAPGetProperty", "LastRefreshedTime", crosstabName)
+ 
+
 Sub RefreshSAPCrosstabAndAddFilter()
     Dim crosstabName As String
     Dim dimensionName As String

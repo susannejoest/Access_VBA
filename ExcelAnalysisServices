@@ -1,0 +1,29 @@
+Sub RefreshAndModifyFilter()
+    Dim ws As Worksheet
+    Dim pvt As PivotTable
+    Dim pvtField As PivotField
+    Dim newFilterValue As String
+
+    ' Define the worksheet and PivotTable
+    Set ws = ThisWorkbook.Worksheets("Sheet1")
+    Set pvt = ws.PivotTables(1) ' Assumes there is only one PivotTable on Sheet1
+    Set pvtField = pvt.PivotFields("YourFilterFieldName") ' Replace with the actual filter field name
+    
+    ' Define the value to add to the filter
+    newFilterValue = "YourNewValue" ' Replace with the value you want to include
+
+    ' Refresh the PivotTable
+    pvt.RefreshTable
+
+    ' Add the new value to the filter
+    On Error Resume Next ' To handle cases where the value is already selected
+    With pvtField
+        .ClearAllFilters
+        .EnableMultiplePageItems = True
+        .PivotItems(newFilterValue).Visible = True
+    End With
+    On Error GoTo 0
+
+    ' Optional: Display a message when done
+    MsgBox "PivotTable refreshed and filter updated!", vbInformation
+End Sub

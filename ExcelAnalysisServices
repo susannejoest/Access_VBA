@@ -1,29 +1,31 @@
-Sub RefreshAndModifyFilter()
+Sub RefreshQueryAndUpdateFilter()
     Dim ws As Worksheet
-    Dim pvt As PivotTable
-    Dim pvtField As PivotField
+    Dim qt As QueryTable
     Dim newFilterValue As String
+    Dim filterField As String
+    Dim filterFormula As String
 
-    ' Define the worksheet and PivotTable
+    ' Define the worksheet and QueryTable
     Set ws = ThisWorkbook.Worksheets("Sheet1")
-    Set pvt = ws.PivotTables(1) ' Assumes there is only one PivotTable on Sheet1
-    Set pvtField = pvt.PivotFields("YourFilterFieldName") ' Replace with the actual filter field name
-    
-    ' Define the value to add to the filter
-    newFilterValue = "YourNewValue" ' Replace with the value you want to include
+    Set qt = ws.QueryTables(1) ' Assumes the QueryTable is the first one on the sheet
 
-    ' Refresh the PivotTable
-    pvt.RefreshTable
+    ' Define the new filter value
+    newFilterValue = "YourNewValue" ' Replace with the value to add to the filter
+    filterField = "YourFilterFieldName" ' Replace with the actual column name used in the query
 
-    ' Add the new value to the filter
-    On Error Resume Next ' To handle cases where the value is already selected
-    With pvtField
-        .ClearAllFilters
-        .EnableMultiplePageItems = True
-        .PivotItems(newFilterValue).Visible = True
-    End With
+    ' Modify the filter
+    ' Construct a filter formula for the QueryTable
+    ' Example: [FilterField] IN ("Value1", "YourNewValue")
+    filterFormula = "[" & filterField & "] IN ('ExistingValue', '" & newFilterValue & "')"
+
+    ' Apply the filter (modifying the QueryTable CommandText)
+    On Error Resume Next
+    qt.CommandText = Replace(qt.CommandText, "OriginalFilterCondition", filterFormula)
     On Error GoTo 0
 
+    ' Refresh the QueryTable
+    qt.Refresh BackgroundQuery:=False
+
     ' Optional: Display a message when done
-    MsgBox "PivotTable refreshed and filter updated!", vbInformation
+    MsgBox "QueryTable refreshed and filter updated!", vbInformation
 End Sub

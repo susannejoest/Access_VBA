@@ -1,31 +1,33 @@
-Sub RefreshQueryAndUpdateFilter()
-    Dim ws As Worksheet
-    Dim qt As QueryTable
+Sub RefreshSAPCrosstabAndAddFilter()
+    Dim crosstabName As String
+    Dim dimensionName As String
     Dim newFilterValue As String
-    Dim filterField As String
-    Dim filterFormula As String
 
-    ' Define the worksheet and QueryTable
-    Set ws = ThisWorkbook.Worksheets("Sheet1")
-    Set qt = ws.QueryTables(1) ' Assumes the QueryTable is the first one on the sheet
+    ' Define the crosstab and filter details
+    crosstabName = "SAPCrosstab1"       ' Name of the Analysis Services crosstab
+    dimensionName = "YourDimensionName" ' Replace with the actual dimension to filter
+    newFilterValue = "YourNewValue"     ' Replace with the new value to add to the filter
 
-    ' Define the new filter value
-    newFilterValue = "YourNewValue" ' Replace with the value to add to the filter
-    filterField = "YourFilterFieldName" ' Replace with the actual column name used in the query
+    ' Refresh the crosstab
+    Call Application.Run("SAPExecuteCommand", "Refresh", crosstabName)
 
-    ' Modify the filter
-    ' Construct a filter formula for the QueryTable
-    ' Example: [FilterField] IN ("Value1", "YourNewValue")
-    filterFormula = "[" & filterField & "] IN ('ExistingValue', '" & newFilterValue & "')"
+    ' Add a new filter value
+    ' Check if the filter already exists and append the new value
+    Dim currentFilter As String
+    currentFilter = Application.Run("SAPGetFilter", crosstabName, dimensionName)
 
-    ' Apply the filter (modifying the QueryTable CommandText)
-    On Error Resume Next
-    qt.CommandText = Replace(qt.CommandText, "OriginalFilterCondition", filterFormula)
-    On Error GoTo 0
+    If InStr(currentFilter, newFilterValue) = 0 Then
+        Dim updatedFilter As String
+        If currentFilter = "" Then
+            updatedFilter = newFilterValue
+        Else
+            updatedFilter = currentFilter & ";" & newFilterValue
+        End If
 
-    ' Refresh the QueryTable
-    qt.Refresh BackgroundQuery:=False
+        ' Apply the updated filter
+        Call Application.Run("SAPSetFilter", crosstabName, dimensionName, updatedFilter)
+    End If
 
-    ' Optional: Display a message when done
-    MsgBox "QueryTable refreshed and filter updated!", vbInformation
+    ' Optional: Notify the user
+    MsgBox "SAP Crosstab refreshed and filter updated!", vbInformation
 End Sub

@@ -24,6 +24,33 @@ Sub RefreshSAPCrosstabAndAddFilter()
             updatedFilter = currentFilter & ";" & newFilterValue
         End If
 
+
+Dimension and measure
+Sub RefreshSAPCrosstabWithMeasureFilter()
+    Dim crosstabName As String
+    Dim measureName As String
+    Dim filterCondition As String
+
+    ' Define the crosstab and filter condition
+    crosstabName = "SAPCrosstab1"        ' The name of your Analysis Services crosstab
+    measureName = "YourMeasureName"      ' Replace with the name of the measure
+    filterCondition = "YourCondition"   ' Replace with the condition (e.g., ">100")
+
+    ' Construct the filter string
+    Dim measureFilter As String
+    measureFilter = measureName & " " & filterCondition
+
+    ' Apply the filter via the SAP API
+    On Error Resume Next
+    Call Application.Run("SAPSetFilter", crosstabName, measureName, measureFilter)
+    On Error GoTo 0
+
+    ' Refresh the crosstab
+    Call Application.Run("SAPExecuteCommand", "Refresh", crosstabName)
+
+    ' Notify the user
+    MsgBox "Crosstab refreshed with measure filter applied!", vbInformation
+End Sub
         ' Apply the updated filter
         Call Application.Run("SAPSetFilter", crosstabName, dimensionName, updatedFilter)
     End If

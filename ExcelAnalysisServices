@@ -1,4 +1,12 @@
- lastRefreshDate = Application.Run("SAPGetProperty", "LastRefreshedTime", crosstabName)
+Add this code to your workbook in the ThisWorkbook module.
+
+     Public Sub Workbook_SAP_Initialize()
+
+       MsgBox "Analysis just initialized " & ThisWorkbook.Name
+
+     End Sub
+
+lastRefreshDate = Application.Run("SAPGetProperty", "LastRefreshedTime", crosstabName)
  
 
 Sub RefreshSAPCrosstabAndAddFilter()

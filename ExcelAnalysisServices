@@ -31,3 +31,29 @@ Sub RefreshSAPCrosstabAndAddFilter()
     ' Optional: Notify the user
     MsgBox "SAP Crosstab refreshed and filter updated!", vbInformation
 End Sub
+
+Sub LoginToSAP()
+    Dim systemName As String
+    Dim username As String
+    Dim password As String
+
+    ' Set your SAP system details
+    systemName = "YourSystemName" ' Replace with your SAP system name
+    username = "YourUsername"    ' Replace with your SAP username
+    password = "YourPassword"    ' Replace with your SAP password (ensure it's securely stored)
+
+    ' Use the SAP API to log in
+    On Error Resume Next
+    Call Application.Run("SAPLogon", systemName, username, password)
+    On Error GoTo 0
+
+    ' Check if login was successful
+    Dim isLoggedIn As Boolean
+    isLoggedIn = Application.Run("SAPGetProperty", "IsLoggedOn")
+
+    If isLoggedIn Then
+        MsgBox "Login successful!", vbInformation
+    Else
+        MsgBox "Login failed. Please check your credentials or system settings.", vbCritical
+    End If
+End Sub

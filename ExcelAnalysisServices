@@ -1,26 +1,62 @@
-Sub ListPowerQueries()
-    Dim query As WorkbookQuery
-    Dim ws As Worksheet
+Sub ListExcelPowerQueries()
+    Dim xlApp As Object ' Excel.Application
+    Dim xlWorkbook As Object ' Excel.Workbook
+    Dim query As Object ' Excel.WorkbookQuery
+    Dim conn As Object ' Excel.WorkbookConnection
+    Dim db As DAO.Database
+    Dim rs As DAO.Recordset
+    Dim filePath As String
     Dim i As Integer
     
-    ' Create a new worksheet to store the query list
-    Set ws = ThisWorkbook.Sheets.Add
-    ws.Name = "Power Queries"
+    ' Path to the Excel file
+    filePath = "C:\Path\To\Your\Workbook.xlsx"
     
-    ' Add headers
-    ws.Cells(1, 1).Value = "Query Name"
-    ws.Cells(1, 2).Value = "Query Formula"
+    ' Open Excel Application
+    On Error Resume Next
+    Set xlApp = CreateObject("Excel.Application")
+    If Err.Number <> 0 Then
+        MsgBox "Excel is not installed or could not be opened.", vbCritical
+        Exit Sub
+    End If
+    On Error GoTo 0
     
-    ' Loop through all queries in the workbook
-    i = 2
-    For Each query In ThisWorkbook.Queries
-        ws.Cells(i, 1).Value = query.Name
-        ws.Cells(i, 2).Value = query.Formula
+    xlApp.Visible = False
+    Set xlWorkbook = xlApp.Workbooks.Open(filePath)
+    
+    ' Open Access Table for data insertion
+    Set db = CurrentDb()
+    Set rs = db.OpenRecordset("PowerQueries", dbOpenDynaset)
+    
+    ' Loop through Workbook Queries
+    i = 0
+    For Each query In xlWorkbook.Queries
+        rs.AddNew
+        rs!QueryName = query.Name
+        rs!QueryFormula = query.Formula
+        rs.Update
         i = i + 1
     Next query
     
-    MsgBox "All Power Queries listed in the sheet named 'Power Queries'.", vbInformation
+    ' Loop through Workbook Connections (if needed)
+    For Each conn In xlWorkbook.Connections
+        rs.AddNew
+        rs!QueryName = conn.Name
+        rs!ConnectionString = conn.ODBCConnection.Connection
+        rs.Update
+    Next conn
+    
+    ' Clean up
+    rs.Close
+    Set rs = Nothing
+    Set db = Nothing
+    xlWorkbook.Close SaveChanges:=False
+    xlApp.Quit
+    Set xlWorkbook = Nothing
+    Set xlApp = Nothing
+    
+    MsgBox i & " queries listed in the Access table 'PowerQueries'.", vbInformation
 End Sub
+
 
 
 Function GetFileLastModifiedDate(filePath As String) As String

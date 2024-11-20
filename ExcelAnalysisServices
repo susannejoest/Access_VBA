@@ -1,3 +1,16 @@
+Function WorksheetExists(wb As Object, sheetName As String) As Boolean
+    Dim ws As Object
+    WorksheetExists = False
+    
+    ' Loop through all worksheets in the workbook
+    For Each ws In wb.Sheets
+        If ws.Name = sheetName Then
+            WorksheetExists = True
+            Exit Function
+        End If
+    Next ws
+End Function
+
 Sub ExportAllQueriesToSheets()
     Dim xlApp As Object
     Dim xlWorkbook As Object

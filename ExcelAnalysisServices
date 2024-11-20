@@ -1,3 +1,16 @@
+
+Sub UnhideAllWorksheets()
+    Dim ws As Worksheet
+
+    ' Loop through all worksheets in the active workbook
+    For Each ws In ThisWorkbook.Worksheets
+        ws.Visible = xlSheetVisible
+    Next ws
+
+    MsgBox "All worksheets have been unhidden.", vbInformation
+End Sub
+
+
 Sub ExportAndImportPowerQueries()
     Dim xlApp As Object ' Excel.Application
     Dim xlWorkbook As Object ' Excel.Workbook

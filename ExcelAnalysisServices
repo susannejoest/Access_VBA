@@ -1,3 +1,14 @@
+
+    ' Loop through each open workbook in the Excel application
+    For Each xlWorkbook In xlApp.Workbooks
+        If xlWorkbook.FullName = filePath Then
+            ' If workbook is open, set the workbook variable
+            Set xlWorkbook = xlWorkbook
+            isWorkbookOpen = True
+            Exit For
+        End If
+    Next xlWorkbook
+
 Function WorksheetExists(wb As Object, sheetName As String) As Boolean
     Dim ws As Object
     WorksheetExists = False

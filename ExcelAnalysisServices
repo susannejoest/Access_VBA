@@ -1,3 +1,16 @@
+    Application.CutCopyMode = False
+    ActiveWorkbook.Connections("Abfrage - dim_LE").Refresh
+    ActiveWorkbook.Worksheets.Add
+    With ActiveSheet.ListObjects.Add(SourceType:=4, Source:=ActiveWorkbook. _
+        Connections("Abfrage - dim_LE"), Destination:=Range("$A$1")).TableObject
+        .RowNumbers = False
+        .PreserveFormatting = True
+        .RefreshStyle = 1
+        .AdjustColumnWidth = True
+        .ListObject.DisplayName = "dim_LE"
+        .Refresh
+    End With
+
 Sub ImportExcelQueriesToAccess()
     Dim xlApp As Object ' Excel.Application
     Dim xlWorkbook As Object ' Excel.Workbook

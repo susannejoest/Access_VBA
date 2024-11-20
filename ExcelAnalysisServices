@@ -1,13 +1,13 @@
-    With xlWs.ListObjects.Add(SourceType:=4, Source:=ActiveWorkbook. _
-        Connections("Abfrage - dim_Geschäftsarten"), Destination:=Range("$A$1")). _
-        TableObject
+    With xlWs.ListObjects.Add(SourceType:=4, Source:=xlWorkbook.Connections(connectionName), Destination:=xlWs.Range("A1"))
+        ' Apply table settings
         .RowNumbers = False
         .PreserveFormatting = True
-        .RefreshStyle = 1
+        .RefreshStyle = 1 ' Ensures the table gets refreshed when the data is updated
         .AdjustColumnWidth = True
-        .ListObject.DisplayName = xlQuery.Name
-        .Refresh
+        .DisplayName = queryName
+        .QueryTable.Refresh BackgroundQuery:=False ' Refresh the data from the query
     End With
+    On Error GoTo 0
 
 
 Sub ExportAllQueriesToSheets() '19:46

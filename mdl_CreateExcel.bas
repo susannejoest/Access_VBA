@@ -46,7 +46,7 @@ Public Function fct_CreateEmptyExcelWorkbookSTD(strFileName As String) As Boolea
   
   On Error GoTo Err_fct_ExcelCreateWorkbook
   
-    Set xlApp = GetObject(, "Excel.Application")
+    Set xlApp = GetObject(, "Excel.Application") ' trap error 429
     If xlApp Is Nothing Then 'Excel not open
         Set xlApp = CreateObject("Excel.Application")
     End If

@@ -1,43 +1,90 @@
-Attribute VB_Name = "mdl_CreateExcel"
-Option Compare Database
-Option Explicit
+****************************************
+EXCEL APP - Create or get Excel App
+****************************************
 
-Public Const blnxlAppVisible As Boolean = False
-Public xlAppWasOpen As Boolean
-
-Public Function fct_ExportExcel(strQueryName As String, strFileName As String) As Boolean
-
-        DoCmd.TransferSpreadsheet acExport, acSpreadsheetTypeExcel9, strQueryName, strFileName, True
-
-End Function
-
-Public Function fct_CreateQueryDefSTD(strQueryName As String, strSQL As String) As Boolean
-
-On Error GoTo Err_fct_CreateQueryDef
-
-        CurrentDb.QueryDefs.Delete strQueryName
-        CurrentDb.CreateQueryDef strQueryName, strSQL
-     
-fct_CreateQueryDefSTD = True
-
-Exit Function
-
-Err_fct_CreateQueryDef:
-    If ERR.Number <> 0 Then
-        Select Case ERR.Number
-            Case 3265 ' qry_temp cannot be deleted since it does not exist, Item not found in this collection
-                ERR.Clear
-                Resume Next
-            Case 0 'spreadsheet is open
-            Case Else
-            MsgBox "Unhandled Error in fct_CreateQueryDefSTD No: " & ERR.Number & " " & ERR.Description
-            Exit Function
-
-        End Select
+    Set xlApp = GetObject(, "Excel.Application") ' must trap error 429 Excel not open
+    If xlApp Is Nothing Then 'Excel not open
+        Set xlApp = CreateObject("Excel.Application")
     End If
-        
-End Function
 
+    ' If target workbook already open, use it
+    For Each xlWb In xlApp.Workbooks
+        If xlWb.FullName = filePath Then
+            ' If workbook is open, set the workbook variable
+            Set xlWb = xlWb
+            GoTo lblNextStep
+            Exit For
+        End If
+    Next xlWb
+    
+    ' If workbook is not open, open it
+    Set xlWb = xlApp.Workbooks.Open(filePath)
+
+lblNextStep:
+
+    Select Case ERR.Number
+        Case 0 ' No error
+        Case 91 'object variable or with block not set
+            Stop
+            Resume Next
+        Case 429 ' Excel not open
+            Resume Next
+            ERR.Clear
+        Case 1004 ' Excel Worksheet already exists
+            GoTo lblMoveNext ' Tab already exists
+            xlWs.Delete
+        Case Else
+            Debug.Print ERR.Number & " " & ERR.Description
+            Resume Next
+    End Select
+
+************
+EXPORT EXCEL to Access?
+*****************
+
+        Attribute VB_Name = "mdl_CreateExcel"
+        Option Compare Database
+        Option Explicit
+        
+        Public Const blnxlAppVisible As Boolean = False
+        Public xlAppWasOpen As Boolean
+        
+        Public Function fct_ExportExcel(strQueryName As String, strFileName As String) As Boolean
+        
+                DoCmd.TransferSpreadsheet acExport, acSpreadsheetTypeExcel9, strQueryName, strFileName, True
+        
+        End Function
+        
+        Public Function fct_CreateQueryDefSTD(strQueryName As String, strSQL As String) As Boolean
+        
+        On Error GoTo Err_fct_CreateQueryDef
+        
+                CurrentDb.QueryDefs.Delete strQueryName
+                CurrentDb.CreateQueryDef strQueryName, strSQL
+             
+        fct_CreateQueryDefSTD = True
+        
+        Exit Function
+        
+        Err_fct_CreateQueryDef:
+            If ERR.Number <> 0 Then
+                Select Case ERR.Number
+                    Case 3265 ' qry_temp cannot be deleted since it does not exist, Item not found in this collection
+                        ERR.Clear
+                        Resume Next
+                    Case 0 'spreadsheet is open
+                    Case Else
+                    MsgBox "Unhandled Error in fct_CreateQueryDefSTD No: " & ERR.Number & " " & ERR.Description
+                    Exit Function
+        
+                End Select
+            End If
+                
+        End Function
+
+*****************
+CREATE EMPTY WORKBOOK
+*****************
 
 Public Function fct_CreateEmptyExcelWorkbookSTD(strFileName As String) As Boolean
                
@@ -98,97 +145,107 @@ Err_fct_ExcelCreateWorkbook:
 
 End Function
 
-Public Function fct_ExcelDeleteWorksheetSTD(strFileName As String, strWsName As String) As Boolean
-               
-  Dim xlApp As Excel.Application
-  Dim xlWb As Excel.Workbook
-  Dim xlWs As Excel.Worksheet
-  
-  On Error GoTo Err_fct_ExcelDeleteWorksheetSTD
-  
-    Set xlApp = GetObject(, "Excel.Application")
-    If xlApp Is Nothing Then 'Excel not open
-        Set xlApp = CreateObject("Excel.Application")
-    End If
+*****************
+WORKSHEET - DELETE
+*****************
+        
+        Public Function fct_ExcelDeleteWorksheetSTD(strFileName As String, strWsName As String) As Boolean
+                       
+          Dim xlApp As Excel.Application
+          Dim xlWb As Excel.Workbook
+          Dim xlWs As Excel.Worksheet
+          
+          On Error GoTo Err_fct_ExcelDeleteWorksheetSTD
+          
+            Set xlApp = GetObject(, "Excel.Application") ' must trap error 429 Excel not open
+            If xlApp Is Nothing Then 'Excel not open
+                Set xlApp = CreateObject("Excel.Application")
+            End If
+        
+            Set xlWb = xlApp.Workbooks.Open(strFileName, , False)
+        
+            xlWb.Sheets(strWsName).Delete
+        
+            
+            xlWb.Save
+            xlWb.Close
+            
+            'xlApp.DisplayAlerts = True
+          
+        
+            
+        lblCleanup:
+        
+            Set xlWs = Nothing
+          Set xlWb = Nothing
+          Set xlApp = Nothing
+        
+        fct_ExcelDeleteWorksheetSTD = True
+            
+        Exit Function
+          
+        
+        Err_fct_ExcelDeleteWorksheetSTD:
+            
+            If ERR.Number <> 0 Then
+                Select Case ERR.Number
+                Case 429 ' Excel not open
+                    Resume Next
+                    ERR.Clear
+                Case Else
+                    MsgBox "Error in fct_ExcelDeleteWorksheetSTD " & ERR.Number & ", Description: " & ERR.Description
+                    fct_ExcelDeleteWorksheetSTD = False
+                    Exit Function
+                End Select
+                GoTo lblCleanup
+            End If
+        
+        
+        
+        End Function
 
-    Set xlWb = xlApp.Workbooks.Open(strFileName, , False)
+*****************
+TRANSFER SPREADSHEET
+*****************
+        
+        Public Function fct_TransferSpreadsheetSTD(strQueryName As String, strFilePathAndName As String) As Boolean
+        
+        On Error GoTo Err_fct_TransferSpreadsheet
+            Kill strFilePathAndName 'delete old file if one exists
+        lblTransfer:
+            DoCmd.TransferSpreadsheet acExport, acSpreadsheetTypeExcel9, strQueryName, strFilePathAndName, True
+        
+            fct_TransferSpreadsheetSTD = True
+        
+        Exit Function
+        
+        Err_fct_TransferSpreadsheet:
+            
+            If ERR.Number <> 0 Then
+                Select Case ERR.Number
+                Case 53 'kill file statement failed, continue
+                    ERR.Clear
+                    Resume Next
+                Case 70 'Spreadsheet already exists and is open
+                    MsgBox "Spreadsheet already exists and is open. Please close before proceeding."
+                    ERR.Clear
+                    GoTo lblTransfer
+                Case 429 ' Excel not open
+                    MsgBox "Excel not open"
+                    Stop
+                Case Else
+                    MsgBox "Error in fct_TransferSpreadsheetSTD Nr: " & ERR.Number & ", Description: " & ERR.Description
+                    fct_TransferSpreadsheetSTD = False
+                    Exit Function
+                End Select
+                'GoTo lblcleanup
+            End If
+            
+        End Function
 
-    xlWb.Sheets(strWsName).Delete
-
-    
-    xlWb.Save
-    xlWb.Close
-    
-    'xlApp.DisplayAlerts = True
-  
-
-    
-lblCleanup:
-
-    Set xlWs = Nothing
-  Set xlWb = Nothing
-  Set xlApp = Nothing
-
-fct_ExcelDeleteWorksheetSTD = True
-    
-Exit Function
-  
-
-Err_fct_ExcelDeleteWorksheetSTD:
-    
-    If ERR.Number <> 0 Then
-        Select Case ERR.Number
-        Case 429 ' Excel not open
-            Resume Next
-            ERR.Clear
-        Case Else
-            MsgBox "Error in fct_ExcelDeleteWorksheetSTD " & ERR.Number & ", Description: " & ERR.Description
-            fct_ExcelDeleteWorksheetSTD = False
-            Exit Function
-        End Select
-        GoTo lblCleanup
-    End If
-
-
-
-End Function
-
-Public Function fct_TransferSpreadsheetSTD(strQueryName As String, strFilePathAndName As String) As Boolean
-
-On Error GoTo Err_fct_TransferSpreadsheet
-    Kill strFilePathAndName 'delete old file if one exists
-lblTransfer:
-    DoCmd.TransferSpreadsheet acExport, acSpreadsheetTypeExcel9, strQueryName, strFilePathAndName, True
-
-    fct_TransferSpreadsheetSTD = True
-
-Exit Function
-
-Err_fct_TransferSpreadsheet:
-    
-    If ERR.Number <> 0 Then
-        Select Case ERR.Number
-        Case 53 'kill file statement failed, continue
-            ERR.Clear
-            Resume Next
-        Case 70 'Spreadsheet already exists and is open
-            MsgBox "Spreadsheet already exists and is open. Please close before proceeding."
-            ERR.Clear
-            GoTo lblTransfer
-        Case 429 ' Excel not open
-            MsgBox "Excel not open"
-            Stop
-        Case Else
-            MsgBox "Error in fct_TransferSpreadsheetSTD Nr: " & ERR.Number & ", Description: " & ERR.Description
-            fct_TransferSpreadsheetSTD = False
-            Exit Function
-        End Select
-        'GoTo lblcleanup
-    End If
-    
-End Function
-
-
+*****************
+WORKSHEETS - COPY
+*****************
 Public Function fct_CopyWorkbookSheetsAllSTD(strWBTemp As String, strWBTarget As String) As Boolean
 
   Dim xlApp As Excel.Application
@@ -264,7 +321,9 @@ Err_fct_ExcelCopyWorkbook:
 
 End Function
 
-
+*****************
+WORKSHEETS - HIDE
+*****************
 Public Function fct_HideWorksheets(strWB As String, Optional strWS As String) As Boolean
 
   Dim xlApp As Excel.Application
@@ -335,6 +394,10 @@ Err_fct_ExcelCopyWorkbook:
 
 End Function
 
+*****************
+FORMAT WORKBOOK
+*****************
+
 Public Function fct_ExcelFormatWorkbookSTD(strFilePathAndName As String, strWsName As String, Optional strWsNameNew As String) As Boolean
                 
   Dim xlApp As Excel.Application
@@ -390,6 +453,9 @@ Err_fct_ExcelFormatWorkbookSTD:
   
 End Function
 
+*****************
+FORMAT WORKSHEET
+*****************
 
 Function fct_ExcelFormatWorksheetSTD(xlWs, Optional strSheetNewName As String) As Boolean
     
@@ -478,6 +544,10 @@ Err_fct_ExcelFormatWorksheet:
     
 End Function
 
+*****************
+EXCEL COLUMN AUTO WIDTH
+*****************
+
 Function fct_ExcelColumnAutoWidthSTD(xlWs, intMaxWidth As Integer) As Boolean
 
      Dim rgCell As Range
@@ -510,7 +580,9 @@ Err_fct_ExcelColumnAutoWidthSTD:
     
  End Function
 
-
+*****************
+EXCEL REFRESH ALL
+*****************
 Public Function fct_ExcelRefreshAll(strFileName As String, blnCloseXlApp As Boolean, blnShowRefreshPrompts As Boolean) As Boolean
                
     Dim xlApp As Excel.Application
@@ -587,6 +659,9 @@ Err_fct_ExcelRefreshAll:
 
 End Function
 
+*****************
+fct_ExcelRefreshAll_xlApp
+*****************
 Public Function fct_ExcelRefreshAll_xlApp(xlApp, strFileName As String) As Boolean
      
     'xlapp must be visible for refresh to work properly

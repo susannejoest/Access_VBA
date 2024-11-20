@@ -1,4 +1,82 @@
-    Application.CutCopyMode = False
+Sub ExportAllQueriesToSheets()
+    Dim xlApp As Object
+    Dim xlWorkbook As Object
+    Dim xlQuery As Object
+    Dim xlSheet As Object
+    Dim queryName As String
+    Dim connectionName As String
+    Dim filePath As String
+    Dim i As Integer
+
+    ' Path to the Excel workbook
+    filePath = "C:\Path\To\Your\Workbook.xlsx"
+
+    ' Open Excel
+    On Error Resume Next
+    Set xlApp = CreateObject("Excel.Application")
+    If Err.Number <> 0 Then
+        MsgBox "Excel is not installed or could not be opened.", vbCritical
+        Exit Sub
+    End If
+    On Error GoTo 0
+
+    xlApp.Visible = False
+    Set xlWorkbook = xlApp.Workbooks.Open(filePath)
+
+    ' Loop through all Power Queries in the workbook
+    i = 0
+    For Each xlQuery In xlWorkbook.Queries
+        queryName = xlQuery.Name
+        connectionName = "Abfrage - " & queryName
+
+        ' Refresh the connection associated with the query
+        On Error Resume Next
+        xlWorkbook.Connections(connectionName).Refresh
+        If Err.Number <> 0 Then
+            MsgBox "Failed to refresh connection: " & connectionName, vbExclamation
+            On Error GoTo 0
+            GoTo NextQuery
+        End If
+        On Error GoTo 0
+
+        ' Add a new worksheet for the query
+        Set xlSheet = xlWorkbook.Worksheets.Add
+        xlSheet.Name = queryName
+
+        ' Load query data into the worksheet
+        With xlSheet.ListObjects.Add( _
+            SourceType:=4, _
+            Source:=xlWorkbook.Connections(connectionName), _
+            Destination:=xlSheet.Range("$A$1")).TableObject
+            .RowNumbers = False
+            .PreserveFormatting = True
+            .RefreshStyle = 1 ' Overwrite existing data
+            .AdjustColumnWidth = True
+            xlSheet.ListObjects(1).DisplayName = queryName
+            .Refresh
+        End With
+
+        i = i + 1
+NextQuery:
+    Next xlQuery
+
+    ' Save and close the workbook
+    xlWorkbook.Save
+    xlWorkbook.Close SaveChanges:=False
+    xlApp.Quit
+
+    ' Cleanup
+    Set xlSheet = Nothing
+    Set xlQuery = Nothing
+    Set xlWorkbook = Nothing
+    Set xlApp = Nothing
+
+    MsgBox i & " queries have been exported to sheets.", vbInformation
+End Sub
+
+
+
+Application.CutCopyMode = False
     ActiveWorkbook.Connections("Abfrage - dim_LE").Refresh
     ActiveWorkbook.Worksheets.Add
     With ActiveSheet.ListObjects.Add(SourceType:=4, Source:=ActiveWorkbook. _

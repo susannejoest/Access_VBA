@@ -65,6 +65,10 @@ End Sub
 ********************************
 Function WorksheetExists
 ********************************
+ Error Handling:
+            Case 1004 ' Tab already exists
+            GoTo lblMoveNext ' Tab already exists
+            xlWs.Delete
 
 Function WorksheetExists(wb As Object, sheetName As String) As Boolean
     Dim ws As Object

@@ -1,4 +1,4 @@
-Sub ExportAllQueriesToSheets()
+Sub ExportAllQueriesToSheets() '19:46
     On Error GoTo ERR
     Dim xlApp As Object
     Dim xlWorkbook As Object
@@ -58,16 +58,25 @@ lblSQL:
             xlSheet.Name = rs![queryName]
         End If
         
-        ' Add the query formula to the worksheet
-        On Error Resume Next
-        Set xlQuery = xlSheet.QueryTables.Add(Connection:="OLEDB;Provider=MSOLAP.7;Data Source=" & strXlQueryFormula, _
-                                              Destination:=xlSheet.Range("A1"))
-        On Error GoTo 0
-
-        ' Refresh the query (data source)
-        If Not xlQuery Is Nothing Then
-            xlQuery.Refresh BackgroundQuery:=False
+        ' Ensure valid query formula (check if it's not empty)
+        If Len(strXlQueryFormula) = 0 Then
+            MsgBox "Query formula is missing for " & strQueryName, vbExclamation
+            GoTo lblMoveNext
         End If
+        
+        ' Adding the query to the sheet using the formula
+        On Error Resume Next
+        Set xlQuery = xlSheet.QueryTables.Add(Connection:=strXlQueryFormula, Destination:=xlSheet.Range("A1"))
+        On Error GoTo 0
+        
+        ' Check if xlQuery was created successfully
+        If xlQuery Is Nothing Then
+            MsgBox "Failed to create query for: " & strQueryName, vbExclamation
+            GoTo lblMoveNext
+        End If
+        
+        ' Refresh the query (data source)
+        xlQuery.Refresh BackgroundQuery:=False
         
         ' Wait until the query refresh completes (optional)
         Do While xlApp.CalculationState <> 0 Or xlApp.Ready = False

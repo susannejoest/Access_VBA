@@ -1,3 +1,28 @@
+Sub ListPowerQueries()
+    Dim query As WorkbookQuery
+    Dim ws As Worksheet
+    Dim i As Integer
+    
+    ' Create a new worksheet to store the query list
+    Set ws = ThisWorkbook.Sheets.Add
+    ws.Name = "Power Queries"
+    
+    ' Add headers
+    ws.Cells(1, 1).Value = "Query Name"
+    ws.Cells(1, 2).Value = "Query Formula"
+    
+    ' Loop through all queries in the workbook
+    i = 2
+    For Each query In ThisWorkbook.Queries
+        ws.Cells(i, 1).Value = query.Name
+        ws.Cells(i, 2).Value = query.Formula
+        i = i + 1
+    Next query
+    
+    MsgBox "All Power Queries listed in the sheet named 'Power Queries'.", vbInformation
+End Sub
+
+
 Function GetFileLastModifiedDate(filePath As String) As String
     Dim fileSystem As Object
     Set fileSystem = CreateObject("Scripting.FileSystemObject")

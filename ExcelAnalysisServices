@@ -1,4 +1,117 @@
 Sub ExportAllQueriesToSheets()
+    On Error GoTo ERR
+    Dim xlApp As Object
+    Dim xlWorkbook As Object
+    Dim xlQuery As Object
+    Dim xlSheet As Object
+    Dim queryName As String
+    Dim connectionName As String
+    Dim strXlQueryFormula As String
+    Dim filePath As String
+    Dim i As Integer
+    Dim strQueryName As String
+    Dim rs As DAO.Recordset
+    Dim strSQL As String
+    Dim strWHERE As String
+    strWHERE = ""
+    
+    ' Path to the Excel workbook
+    filePath = "C:\Temp\ProfitaS_Dashboard_wip 20 - Copy SJ.xlsm"
+    
+    ' Open Excel if not open already
+    Set xlApp = GetObject(, "Excel.Application") ' Trap error 429
+    If xlApp Is Nothing Then ' Excel not open
+        Set xlApp = CreateObject("Excel.Application")
+    End If
+    xlApp.Visible = True
+    
+    ' Loop through each open workbook in the Excel application
+    For Each xlWorkbook In xlApp.Workbooks
+        If xlWorkbook.FullName = filePath Then
+            ' If workbook is open, set the workbook variable
+            Set xlWorkbook = xlWorkbook
+            GoTo lblSQL
+            Exit For
+        End If
+    Next xlWorkbook
+    
+    ' If workbook is not open, open it
+    Set xlWorkbook = xlApp.Workbooks.Open(filePath)
+
+lblSQL:
+    ' Fetch query names from the Access table
+    strSQL = "SELECT * FROM qry_PowerQueryList " & IIf(strWHERE > "", " WHERE " & strWHERE, "")
+    Set rs = CurrentDb.OpenRecordset(strSQL, dbOpenDynaset)
+    
+    ' Loop through all the queries
+    Do Until rs.EOF
+        Debug.Print rs![queryName]
+        strQueryName = rs![queryName]
+        strXlQueryFormula = rs![queryFormula]
+        
+        ' Add a new worksheet for the query
+        If WorksheetExists(xlWorkbook, rs![queryName]) Then
+            Debug.Print "Workbook already exists: " & rs![queryName]
+        Else
+            ' If worksheet does not exist, create it
+            Set xlSheet = xlWorkbook.Worksheets.Add
+            xlSheet.Name = rs![queryName]
+        End If
+        
+        ' Add the query formula to the worksheet
+        On Error Resume Next
+        Set xlQuery = xlSheet.QueryTables.Add(Connection:="OLEDB;Provider=MSOLAP.7;Data Source=" & strXlQueryFormula, _
+                                              Destination:=xlSheet.Range("A1"))
+        On Error GoTo 0
+
+        ' Refresh the query (data source)
+        If Not xlQuery Is Nothing Then
+            xlQuery.Refresh BackgroundQuery:=False
+        End If
+        
+        ' Wait until the query refresh completes (optional)
+        Do While xlApp.CalculationState <> 0 Or xlApp.Ready = False
+            DoEvents
+        Loop
+
+        i = i + 1
+        rs.MoveNext
+    Loop
+
+    ' Save and close the workbook
+    xlWorkbook.Save
+    xlWorkbook.Close SaveChanges:=False
+    xlApp.Quit
+
+lblCleanup:
+    rs.Close
+    Set rs = Nothing
+    Set xlSheet = Nothing
+    Set xlQuery = Nothing
+    Set xlWorkbook = Nothing
+    Set xlApp = Nothing
+    MsgBox i & " queries have been exported to sheets.", vbInformation
+    Exit Sub
+
+ERR:
+    Select Case ERR.Number
+        Case 0 ' No error
+        Case 429 ' Excel not open
+            Resume Next
+            ERR.Clear
+        Case 1004 ' Tab already exists
+            GoTo lblMoveNext ' Tab already exists
+            xlSheet.Delete
+        Case Else
+            Debug.Print ERR.Number & " " & ERR.Description
+            Resume Next
+    End Select
+End Sub
+
+*******
+
+
+Sub ExportAllQueriesToSheets()
 
 On Error GoTo ERR
 

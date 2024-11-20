@@ -1,3 +1,15 @@
+    With xlWs.ListObjects.Add(SourceType:=4, Source:=ActiveWorkbook. _
+        Connections("Abfrage - dim_Geschäftsarten"), Destination:=Range("$A$1")). _
+        TableObject
+        .RowNumbers = False
+        .PreserveFormatting = True
+        .RefreshStyle = 1
+        .AdjustColumnWidth = True
+        .ListObject.DisplayName = xlQuery.Name
+        .Refresh
+    End With
+
+
 Sub ExportAllQueriesToSheets() '19:46
     On Error GoTo ERR
     Dim xlApp As Object

@@ -1,3 +1,91 @@
+Sub ImportExcelQueriesToAccess()
+    Dim xlApp As Object ' Excel.Application
+    Dim xlWorkbook As Object ' Excel.Workbook
+    Dim xlQuery As Object ' Excel.WorkbookQuery
+    Dim xlSheet As Object ' Excel.Worksheet
+    Dim db As DAO.Database
+    Dim tblName As String
+    Dim queryName As String
+    Dim tempFilePath As String
+    Dim filePath As String
+    Dim i As Integer
+    
+    ' Path to the Excel workbook
+    filePath = "C:\Path\To\Your\Workbook.xlsx"
+    
+    ' Open Excel
+    On Error Resume Next
+    Set xlApp = CreateObject("Excel.Application")
+    If Err.Number <> 0 Then
+        MsgBox "Excel is not installed or could not be opened.", vbCritical
+        Exit Sub
+    End If
+    On Error GoTo 0
+
+    xlApp.Visible = False
+    Set xlWorkbook = xlApp.Workbooks.Open(filePath)
+    
+    ' Ensure sheet tabs are displayed
+    xlApp.DisplayWorkbookTabs = True
+
+    ' Initialize Access database object
+    Set db = CurrentDb()
+
+    ' Loop through all Power Queries in the workbook
+    i = 0
+    For Each xlQuery In xlWorkbook.Queries
+        queryName = xlQuery.Name
+        
+        ' Create a new worksheet with the name of the query
+        On Error Resume Next
+        Set xlSheet = xlWorkbook.Sheets(queryName)
+        If Err.Number <> 0 Then
+            Set xlSheet = xlWorkbook.Sheets.Add
+            xlSheet.Name = queryName
+        End If
+        On Error GoTo 0
+
+        ' Clear any existing data in the sheet
+        xlSheet.Cells.Clear
+
+        ' Load the query result into the worksheet
+        With xlSheet.ListObjects.Add(SourceType:=0, Source:=xlQuery.Formula, Destination:=xlSheet.Range("A1"))
+            .QueryTable.Refresh BackgroundQuery:=False
+        End With
+
+        ' Define the Access table name based on the query name
+        tblName = "Imported_" & Replace(queryName, " ", "_")
+
+        ' Delete the table if it exists to prevent duplicate imports
+        On Error Resume Next
+        db.Execute "DROP TABLE [" & tblName & "]"
+        On Error GoTo 0
+
+        ' Import the worksheet into Access
+        DoCmd.TransferSpreadsheet _
+            TransferType:=acImport, _
+            SpreadsheetType:=acSpreadsheetTypeExcel12Xml, _
+            TableName:=tblName, _
+            FileName:=filePath, _
+            HasFieldNames:=True, _
+            Range:=queryName & "$"
+
+        i = i + 1
+    Next xlQuery
+
+    ' Save and close the Excel workbook
+    xlWorkbook.Close SaveChanges:=False
+    xlApp.Quit
+
+    ' Cleanup
+    Set xlSheet = Nothing
+    Set xlQuery = Nothing
+    Set xlWorkbook = Nothing
+    Set xlApp = Nothing
+    Set db = Nothing
+
+    MsgBox i & " queries have been imported into Access.", vbInformation
+End Sub
 
 
 Sub ForceUnhideAllSheetsWithQueries()

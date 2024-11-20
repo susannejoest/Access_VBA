@@ -1,4 +1,152 @@
+Sub ExportAllQueriesToSheets()
 
+On Error GoTo ERR
+
+    Dim xlApp As Object
+    Dim xlWorkbook As Object
+    Dim xlQuery As Object
+    Dim xlSheet As Object
+    Dim queryName As String
+    Dim connectionName As String
+    Dim strXlQueryFormula As String
+    'Dim filePath As String
+    Dim i As Integer
+    Dim strQueryName As String
+    Dim rs As DAO.Recordset
+    Dim strSQL As String
+    Dim strWHERE As String
+strWHERE = ""
+
+
+    ' Path to the Excel workbook
+    filePath = "C:\Temp\ProfitaS_Dashboard_wip 20 - Copy SJ.xlsm"
+    ' https://generaliche-my.sharepoint.com/personal/p258097_gch_generali_ch/Documents/Desktop/ProfitaS/Susanne/ProfitaS_Dashboard_wip 20 - Copy SJ.xlsm
+    ' Open Excel
+        Set xlApp = GetObject(, "Excel.Application") ' trap error 429
+    If xlApp Is Nothing Then 'Excel not open
+        Set xlApp = CreateObject("Excel.Application")
+    End If
+    
+       xlApp.Visible = True
+    
+        ' Loop through each open workbook in the Excel application
+    For Each xlWorkbook In xlApp.Workbooks
+        If xlWorkbook.FullName = filePath Then
+            ' If workbook is open, set the workbook variable
+            Set xlWorkbook = xlWorkbook
+            GoTo lblSQL
+            Exit For
+
+        End If
+    Next xlWorkbook
+    
+Set xlWorkbook = xlApp.Workbooks.Open(filePath)
+
+lblSQL:
+strSQL = "SELECT * FROM qry_PowerQueryList " & IIf(strWHERE > "", " WHERE " & strWHERE, "")
+     Set rs = CurrentDb.OpenRecordset(strSQL, dbOpenDynaset)
+         
+     Do Until rs.EOF
+         'Debug.Print rs(1).Value
+         'rs!FieldID
+         Debug.Print rs![queryName]
+         strQueryName = rs![queryName]
+         strXlQueryFormula = rs![queryFormula]
+        
+GoTo lblAddQueryWorksheet 'skip, too memory intensive
+
+lblRefresh:
+        ' Refresh the connection associated with the query
+        On Error Resume Next
+        xlWorkbook.Connections(connectionName).Refresh
+        If ERR.Number <> 0 Then
+            MsgBox "Failed to refresh connection: " & connectionName, vbExclamation
+            On Error GoTo 0
+            GoTo lblMoveNext:
+        End If
+        On Error GoTo 0
+        
+lblAddQueryWorksheet:
+        ' Add a new worksheet for the query
+        If WorksheetExists(xlWorkbook, rs![queryName]) Then
+            Debug.Print "Workbook already exists: " & rs![queryName]
+            GoTo lblMoveNext
+        Else
+                'if Worksheet does not yet exist then create it
+            Set xlSheet = xlWorkbook.Worksheets.Add
+            xlSheet.Name = rs![queryName]
+        End If
+        
+        ' Load the query result into the worksheet
+        ' xlQuery.Formula
+        With xlSheet.ListObjects.Add(SourceType:=0, Source:=strQueryName, Destination:=xlSheet.Range("A1"))
+            .QueryTable.Refresh BackgroundQuery:=False
+        End With
+
+        ' Load query data into the worksheet
+        'With xlSheet.ListObjects.Add( _
+        '    SourceType:=4, _
+        '    Source:=xlWorkbook.Connections(connectionName), _
+         '   Destination:=xlSheet.Range("$A$1")).TableObject
+         '   .RowNumbers = False
+            '.PreserveFormatting = True
+         '   .RefreshStyle = 1 ' Overwrite existing data
+            '.AdjustColumnWidth = True
+         '   xlSheet.ListObjects(1).DisplayName = queryName
+            '.Refresh too memory intensive
+        'End With
+        
+        Do While xlApp.calculationstate <> 0 Or xlApp.ready = False
+            DoEvents
+        Loop
+        
+        i = i + 1
+
+lblMoveNext:
+         rs.MoveNext
+     Loop
+     
+
+    ' Save and close the workbook
+    xlWorkbook.Save
+    xlWorkbook.Close SaveChanges:=False
+    xlApp.Quit
+
+lblCleanup:
+    rs.Close
+    Set rs = Nothing
+    'Set db = Nothing
+    Set xlSheet = Nothing
+    Set xlQuery = Nothing
+    Set xlWorkbook = Nothing
+    Set xlApp = Nothing
+
+    MsgBox i & " queries have been exported to sheets.", vbInformation
+Exit Sub
+
+ERR:
+Select Case ERR.Number
+    Case 0 'spreadsheet is open
+        Stop
+    
+    Case 429 ' Excel not open
+            Resume Next
+            ERR.Clear
+    Case 1004 'That name is already taken. Try a different one.
+        GoTo lblMoveNext 'tab already exists
+        xlSheet.Delete
+    
+    Case Else
+        Debug.Print ERR.Number & " " & ERR.Description
+        Stop
+        Resume Next
+        
+End Select
+
+End Sub
+
+
+******************
     ' Loop through each open workbook in the Excel application
     For Each xlWorkbook In xlApp.Workbooks
         If xlWorkbook.FullName = filePath Then

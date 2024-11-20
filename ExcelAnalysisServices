@@ -1,3 +1,97 @@
+Sub ExportAndImportPowerQueries()
+    Dim xlApp As Object ' Excel.Application
+    Dim xlWorkbook As Object ' Excel.Workbook
+    Dim xlSheet As Object ' Excel.Worksheet
+    Dim query As Object ' Excel.WorkbookQuery
+    Dim rs As DAO.Recordset
+    Dim db As DAO.Database
+    Dim filePath As String
+    Dim tempFilePath As String
+    Dim i As Integer
+
+    ' Path to the Excel file
+    filePath = "C:\Path\To\Your\Workbook.xlsx"
+    ' Path to save temporary data file
+    tempFilePath = "C:\Path\To\TempData.xlsx"
+
+    ' Open Excel Application
+    On Error Resume Next
+    Set xlApp = CreateObject("Excel.Application")
+    If Err.Number <> 0 Then
+        MsgBox "Excel is not installed or could not be opened.", vbCritical
+        Exit Sub
+    End If
+    On Error GoTo 0
+    
+    xlApp.Visible = False
+    Set xlWorkbook = xlApp.Workbooks.Open(filePath)
+
+    ' Loop through Power Queries
+    i = 0
+    For Each query In xlWorkbook.Queries
+        ' Create a new worksheet with the name of the query
+        On Error Resume Next
+        Set xlSheet = xlWorkbook.Sheets(query.Name)
+        If Err.Number <> 0 Then
+            Set xlSheet = xlWorkbook.Sheets.Add
+            xlSheet.Name = query.Name
+        End If
+        On Error GoTo 0
+
+        ' Load data into the worksheet
+        xlSheet.Cells.Clear
+        With xlSheet.ListObjects.Add(SourceType:=0, Source:=query.Formula, Destination:=xlSheet.Range("A1"))
+            .QueryTable.Refresh BackgroundQuery:=False
+        End With
+        i = i + 1
+    Next query
+
+    ' Save Workbook to Temp File
+    xlWorkbook.SaveAs tempFilePath
+    xlWorkbook.Close SaveChanges:=False
+    xlApp.Quit
+    Set xlWorkbook = Nothing
+    Set xlApp = Nothing
+
+    ' Import Data from Excel Sheets into Access
+    Set db = CurrentDb()
+
+    Dim xlTempApp As Object
+    Dim xlTempWorkbook As Object
+    Dim xlTempSheet As Object
+
+    Set xlTempApp = CreateObject("Excel.Application")
+    Set xlTempWorkbook = xlTempApp.Workbooks.Open(tempFilePath)
+
+    For Each xlTempSheet In xlTempWorkbook.Sheets
+        ' Open a new recordset for each sheet
+        Dim sql As String
+        sql = "DELETE FROM PowerQueryData WHERE QueryName = '" & xlTempSheet.Name & "'"
+        db.Execute sql ' Clear old data for this query if it exists
+
+        ' Transfer data to Access
+        DoCmd.TransferSpreadsheet _
+            TransferType:=acImport, _
+            SpreadsheetType:=acSpreadsheetTypeExcel12Xml, _
+            TableName:="PowerQueryData", _
+            FileName:=tempFilePath, _
+            HasFieldNames:=True, _
+            Range:=xlTempSheet.Name & "$"
+    Next xlTempSheet
+
+    xlTempWorkbook.Close SaveChanges:=False
+    xlTempApp.Quit
+
+    ' Clean up
+    Kill tempFilePath ' Delete temp file
+    MsgBox i & " queries exported and imported into Access.", vbInformation
+
+    Set xlTempSheet = Nothing
+    Set xlTempWorkbook = Nothing
+    Set xlTempApp = Nothing
+    Set db = Nothing
+End Sub
+
 Sub ListExcelPowerQueries()
     Dim xlApp As Object ' Excel.Application
     Dim xlWorkbook As Object ' Excel.Workbook

@@ -1,4 +1,42 @@
-    With xlWs.ListObjects.Add(SourceType:=4, Source:=xlWorkbook.Connections(connectionName), Destination:=xlWs.Range("A1"))
+ProfitaS project plan / Data STORAGE
+Status Quo / Current Challenges
+Qualität auf 100% Genauigkeit bringen - umfassende vollautomatisierte End to End Checks
+Prozesse stabilisieren, Datenintegrität gewährleisten
+und allgemeine Governance / dokumentation / data flow abbilden und transparenter machen und für EOC dokumentieren
+andere quellen wie Gruppen-Tools und andere quellen, nicht nur BW, in DB zusammenfügen (auch heute schon diverse Quellen) und weitere kommen hinzu - wir sind vorbereitet auf Wechsel der Datenquellen + One Finance kommt bald, gruppe erlaubt keine eigenen apps, ausser scope wird reduziert
+datenflow in Visualisierungen
+Work in progress – viel Neues kommt hinzu wo wir nicht jedesmal einen change request machen können (oder eigene BW queries in unserer Domäne wo wir ohne change ändern können?)
+Daten werden derzeit in Excel und Power BI gespeichert - beides keine ordentlichen Datenbanken = Geschäftsrisiko
+aktuell Profitas Datenmodell via Power Query
+Stabilität und Single Point of truth for data
+Möglichkeit die Daten den Stakeholdern strukturiert zur Verfügung zu stellen
+Aggregate Data to the needed granularities / Overall aggregation for fast performance of ProfitaS Overview
+
+Goals / Why a Separate Database (SQL server or Oracle)
+
+Very fast implementation - Drive new features quickly and with maximum agility, without bottlenecks or dependencies
+Granularen Zugriff mit Rechten pro Spalte etc. , die man später so auch in BW abbilden kann 
+SQL only used for storage of the data breakdowns we use, exactly the way we need it, not meant to compete with SAP BW – anything that can directly be queried or hosted in BW, we will gladly use from there without duplicating anything ( e.g. via SQL server integration services)
+
+SAP BW Challenges
+SAP Team langfristig sehr hoch ausgelastet, sehr wenig freie Kapazität (e.g. Sales benutzt Tableau weil bw Team keine Kapazität hatte) - lange Laufzeiten für Implementierungen und Änderungen
+Sehr hohe Kosten
+Überlastungsprobleme, z.B. Policenquery , wenn man Kanal und LoB hinzufügt ist die Abfrage überfordert (diese query könnten wir auch mal ansehen und ggf kann man es verbessern)
+To do Note SJ: Clarify if there is a BW connector for Power BI and SQL server that we can use
+Vollautomatisierung über BW nicht möglich (AFO Abfragen SAP Scripting nicht erlaubt)
+
+
+Long Term Outlook / Transition Planning to SAP BW
+Datenbank dient dann auch als Modell und requirements für BW Transition
+gestaffelt ins BW übertragen wie es Sinn macht und Kapazitäten da sind
+externe excel-inputs zuerst ins BW
+Ausblick / Zukunftsplanung
+Profitas 2.0 erweitern, Finance view brücke
+Profitas bis 2021 zurück, history wird wichtiger, Analysen für Vergangenheitsdaten (fact table nur Delta laden)
+
+
+
+With xlWs.ListObjects.Add(SourceType:=4, Source:=xlWorkbook.Connections(connectionName), Destination:=xlWs.Range("A1"))
         ' Apply table settings
         .RowNumbers = False
         .PreserveFormatting = True

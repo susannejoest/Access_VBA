@@ -1,3 +1,8 @@
+please turn the input text below into the outline for a management summary presentation to make the case to implement a sql server database to replace the current Excel and Power Query process. 
+It should also make the case why using SAP BW is initially not an option but a transition to BW can be planned later.
+structure the slide content with good headings to support this. Any details not needed for the management summary can be put into backup slides at the back.
+
+Input Text:
 ProfitaS project plan / Data STORAGE
 Status Quo / Current Challenges
 Qualität auf 100% Genauigkeit bringen - umfassende vollautomatisierte End to End Checks
@@ -36,11 +41,6 @@ Full auditing of who changed which data on which date, full traceability in case
 Power BI / Excel are not proper data repositories usually accepted by auditors and DIN norms as an enterprise grade data archiving system, but SQL Server is
 Since we already have a server we can install sql server on it to fully use its capacity
 
-
-
-
-
-
 SAP BW Challenges
 SAP Team langfristig sehr hoch ausgelastet, sehr wenig freie Kapazität (e.g. Sales benutzt Tableau weil bw Team keine Kapazität hatte) - lange Laufzeiten für Implementierungen und Änderungen
 Sehr hohe Kosten
@@ -68,9 +68,6 @@ Collaboration and Accessibility: By using SQL Server, multiple users can access 
 
 Power bi connector is a problem since it does not use queries only BUT the 
 SQL Server sap bw integration might work for us for full automation
-
-
-
 
 *********************
 

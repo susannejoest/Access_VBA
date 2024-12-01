@@ -1,5 +1,3 @@
-can you turn this ext into a power point structure that makes sense, with appropriate headings and the text in English: 
-
 ProfitaS project plan / Data STORAGE
 Status Quo / Current Challenges
 Qualität auf 100% Genauigkeit bringen - umfassende vollautomatisierte End to End Checks
@@ -13,12 +11,35 @@ aktuell Profitas Datenmodell via Power Query
 Stabilität und Single Point of truth for data
 Möglichkeit die Daten den Stakeholdern strukturiert zur Verfügung zu stellen
 Aggregate Data to the needed granularities / Overall aggregation for fast performance of ProfitaS Overview
+Side by side snapshots vorheriger Monate, z.b. Daten-Monat in dropdown wählen, Gesamtübersicht
+Sql server beschleunigt Arbeit Output und Automatisierung wie ¼ zusätzlicher FTE
+Absolute Verlässlichkeit, Teilen der Quelldaten für andere stakeholder möglich, die diese ggf derzeit arbeitsaufwendig extrahieren
 
 Goals / Why a Separate Database (SQL server or Oracle)
 
 Very fast implementation - Drive new features quickly and with maximum agility, without bottlenecks or dependencies
 Granularen Zugriff mit Rechten pro Spalte etc. , die man später so auch in BW abbilden kann 
 SQL only used for storage of the data breakdowns we use, exactly the way we need it, not meant to compete with SAP BW – anything that can directly be queried or hosted in BW, we will gladly use from there without duplicating anything ( e.g. via SQL server integration services)
+Professional options such as rollback to previous data versions in case of issues (e.g. in batches)
+Native integration with Excel (SQL Server tables can be linked to or imported into Excel and used from there)
+Comprehensive end to end quality checks can be fully automated
+Absolute precision in SQL server handling fractional values to minimize rounding errors and variances
+Financial data requires complex calculations and aggregations. SQL Server is optimized for handling complex queries efficiently, which can be cumbersome in Excel
+As financial data grows, SQL Server can scale to accommodate larger datasets without a significant drop in performance, unlike Excel, which can become slow and unwieldy with large volumes of data – with SQL server we pre-empt any performance issues.
+SQL Server allows for the automation of data transformations and the scheduling of regular updates, ensuring that financial reports are always up-to-date without manual intervention
+Optimal Integration with our existing Microsoft ecosystem: SQL Server integrates seamlessly with business intelligence tools like Power BI, enabling advanced analytics and better visualization of financial data
+SQL Server can handle real-time data processing, which is crucial for financial reporting and controlling. This ensures that reports are always based on the most current data. That is, the data will be available with only a very minor delay.
+Financial data is often sensitive. SQL Server offers advanced security features, such as encryption and role-based access control, to protect this data at the database layer meaning that if a mistake is made and an online dashboard or report mistakenly shared, the report will come up empty – double security
+SQL Server ensures data integrity through constraints and transactions, reducing the risk of errors that can occur with manual data handling in Excel
+Sql server tables, queries and procedures double as a full documentation of the processes (data errors are prevented from occurring in the first place, which is much better than spotting and fixing them automatically later)
+Full auditing of who changed which data on which date, full traceability in case of any issues, ability to then just restore a corrupt data element 
+Power BI / Excel are not proper data repositories usually accepted by auditors and DIN norms as an enterprise grade data archiving system, but SQL Server is
+Since we already have a server we can install sql server on it to fully use its capacity
+
+
+
+
+
 
 SAP BW Challenges
 SAP Team langfristig sehr hoch ausgelastet, sehr wenig freie Kapazität (e.g. Sales benutzt Tableau weil bw Team keine Kapazität hatte) - lange Laufzeiten für Implementierungen und Änderungen
@@ -36,7 +57,22 @@ Ausblick / Zukunftsplanung
 Profitas 2.0 erweitern, Finance view brücke
 Profitas bis 2021 zurück, history wird wichtiger, Analysen für Vergangenheitsdaten (fact table nur Delta laden)
 
+Performance and Scalability: SQL Server can handle large volumes of data more efficiently than Excel. It is designed for high-performance data processing and can manage complex queries and large datasets without the performance issues that Excel might encounter
+Data Integrity and Security: SQL Server provides robust data integrity and security features. It supports transactions, which ensure data consistency, and offers advanced security measures to protect sensitive information
 
+Centralized Data Management: With SQL Server, you can centralize your data management. This means all your data transformations and reporting can be managed in one place, making it easier to maintain and update
+Automation and Scheduling: SQL Server allows you to automate data transformations and schedule regular updates. This reduces manual intervention and ensures that your reports are always up-to-date
+Advanced Analytics and Integration: SQL Server integrates well with other Microsoft tools like Power BI, enabling advanced analytics and better data visualization. It also supports integration with various data sources, making it a versatile choice for data management.
+Collaboration and Accessibility: By using SQL Server, multiple users can access and work on the data simultaneously, improving collaboration. It also supports remote access, allowing users to work from different locations.
+
+
+Power bi connector is a problem since it does not use queries only BUT the 
+SQL Server sap bw integration might work for us for full automation
+
+
+
+
+*********************
 
 With xlWs.ListObjects.Add(SourceType:=4, Source:=xlWorkbook.Connections(connectionName), Destination:=xlWs.Range("A1"))
         ' Apply table settings

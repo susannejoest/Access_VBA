@@ -1,3 +1,18 @@
+Total PY YTD =
+CALCULATE(
+    SUM(DBIM_PWalk_NL_YTD[Premium_YTD_Mio.]),
+    DATESYTD(
+        Dim_Datum[DT_Datum_DD_MM]
+    ),
+    SAMEPERIODLASTYEAR(
+        DATESBETWEEN(
+            Dim_Datum[DT_Datum_DD_MM],
+            DATE(YEAR(MAX(Dim_Datum[DF_CurrentReportingMonth_EndOfMonth])) - 1, 1, 1),
+            MAX(Dim_Datum[DF_CurrentReportingMonth_EndOfMonth]) - 365
+        )
+    )
+)
+
 Total PY YTD = CALCULATE(sum(DBIM_PWalk_NL_YTD[Premium_YTD_Mio.]),SAMEPERIODLASTYEAR(dim_Datum[DT_Datum_DD_MM]))
 
 Total CY YTD =

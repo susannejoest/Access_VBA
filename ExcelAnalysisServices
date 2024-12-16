@@ -1,3 +1,13 @@
+Total CY YTD =
+CALCULATE(
+    SUM(DBIM_PWalk_NL_YTD[Premium_YTD_Mio.]),
+    DATESYTD(
+        Dim_Datum[Date],
+        "31/12"  // Optional if you need a non-calendar year
+    ),
+    Dim_Datum[Date] <= MAX(Dim_Datum[DF_CurrentReportingMonth_EndOfMonth])
+)
+****
 Total CY YTD = 
 CALCULATE(
     SUM(DBIM_PWalk_NL_YTD[Premium_YTD_Mio.]),

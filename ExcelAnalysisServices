@@ -1,3 +1,10 @@
+Total CY YTD = 
+CALCULATE(
+    SUM(DBIM_PWalk_NL_YTD[Premium_YTD_Mio.]),
+    DATESYTD(Dim_Datum[DF_CurrentReportingMonth_FirstOfMonth])
+)
+
+
 Management Summary Presentation Outline: SQL Server Implementation for Data Storage
 Slide 1: Title Slide
 Title: "Enhancing Data Management for ProfitaS: SQL Server as a Strategic Solution"

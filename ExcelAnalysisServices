@@ -1,3 +1,12 @@
+Überprüfen Sie Ihr Wissen über das General Measurement Model. Ergänzen Sie die Lücken mit den richtigen Begriffen!
+
+Laut dem General Measurement Model (GMM) sind die veränderten Schätzungen des Fulfillment Cashflows auf die folgenden 3 Änderungen zurückzuführen:
+
+1)
+Änderungen, die sich auf _________ oder _________Deckung beziehen (z.B. Schäden, die höher als erwartet ausgefallen sind), werden in der Gewinn- und Verlustrechnung erfasst
+
+
+
 Total PY YTD =
 CALCULATE(
     SUM(DBIM_PWalk_NL_YTD[Premium_YTD_Mio.]),

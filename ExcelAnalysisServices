@@ -1,6 +1,6 @@
 =TEXT(DATE(YEAR(TODAY()), 3*INT((MONTH(TODAY())-1)/3), 1)-1, "dd mmmm")
 
-
+=TEXT(DATE(YEAR(TODAY()), 3*INT((MONTH(TODAY())-1)/3), 1)-1, "mm mmmm")
 3)
 
 Änderungen in den finanziellen Annahmen, die im ______________ (im sonstigen Gesamtergebnis) erfasst werden (z.B. Änderung der Marktzinssätze)

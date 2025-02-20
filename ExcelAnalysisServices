@@ -1,7 +1,8 @@
-I want to connect to a Wolters Kluwer Tagetik database from Power BI via the Power BI Tagetik connector.
 
-which values do I enter under URL, database and analytical Workspace when the tagetik web link is: https://generaligenesi-prod.saastagetik.com/prod/5?ver=5.3.30.445&currentMillis=1740065417282#!/reporting/reportlist/TGK_GENERALI_009
-
+Field	Value
+URL	https://generaligenesi-prod.saastagetik.com/prod/
+Database	prod
+Analytical Workspace	5
 
 Total PY YTD =
 CALCULATE(

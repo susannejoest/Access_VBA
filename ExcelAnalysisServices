@@ -1,3 +1,24 @@
+1. Process Description / Problem Statement
+
+Tagetik reports need to be run at least around 30-40 times a year
+during the planning phase a lot more runs can be needed, up to 1-2 times a day for some reports
+Many reports have to be run multiple times in several ‘variants’, such as one download per legal entity for all legal entities, or multiple currency types
+It is especially problematic that these reports have to be run daily or even multiple times a day during closing, just when time is short already, and tight deadlines have to be met
+Reports should ideally already be complete and available before the stakeholders begin work in the morning, so that there is no delay in any work steps that depend on these reports
+Having to enter up to 9 prompts per report, some of them requiring multiple selections in a single prompt, is time consuming and error prompt
+Process is repetitive and always done exactly the same way, and it is fully digital, therefore it scores 100% on the ‘great candidate for automation' scale
+FinCo has additional monthly closing processes in mind that could be candidates for automation , where lots more hours could potentially be saved
+
+2. Key Objectives / Benefits
+
+Save time and money by downloading reports automatically (Task ties up 2.5 hours per run just for the clearance + management reports).
+Zero mistakes in all prompts that need to be entered, especially the multivalue prompts and those where the same report must be run multiple times and saved with a custom name indicating which run it is (e.g. which Generali legal entity)
+Free up controller time during critical business periods, speed up the closing process, avoid delays, help to ensure that deadlines can be met on time
+Improve Controller well-being by eliminating a very boring and repetitive task that also blocks their laptops needlessly during each run
+Run reports in a frequency that will result in the maximum business benefit, regardless of employee availability consideration
+Make optimum of currently unused Tagetik ‘idle’ time and system availability, resulting in fast and efficient load times. This is accomplished by scheduling the ‘main’ report run at 3am in the morning, just after the Tagetik GHO load is complete, and when nobody else is working in the system. The system will be tied up a lot less during business hours and is fully available for other critical tasks
+
+
 
 Field	Value
 URL	https://generaligenesi-prod.saastagetik.com/prod/

@@ -1,1 +1,69 @@
+Management Summary: Robotic Process Automation for Tagetik Reports
+
+1. Process Description / Problem Statement
+
+The current process of running Tagetik reports is highly repetitive, time-consuming, and prone to human error. Key challenges include:
+
+Reports need to be generated 30-40 times per year, with significantly higher frequency during the planning phase (up to 1-2 times per day for certain reports).
+
+Many reports require execution in multiple variants (e.g., per legal entity, different currency types), increasing manual workload.
+
+During financial closing periods, reports must be run multiple times per day, precisely when time is most critical and deadlines are tight.
+
+Stakeholders rely on these reports to be ready before the start of their workday, meaning any delay disrupts dependent workflows.
+
+Running a single report requires up to 9 manual prompts, some involving multiple selections, which is both time-consuming and error-prone.
+
+The process is entirely digital, repetitive, and rule-based, making it an ideal candidate for automation.
+
+Additional monthly closing processes could also benefit from automation, unlocking even greater efficiency gains.
+
+2. Key Objectives / Benefits
+
+Implementing Robotic Process Automation (RPA) for Tagetik report generation will provide the following benefits:
+
+✅ Significant Time & Cost Savings
+
+Automating the process will eliminate 2.5 hours per run spent on clearance and management reports alone.
+
+Controllers can focus on high-value tasks rather than repetitive data extraction.
+
+✅ Error-Free Execution
+
+Eliminates manual errors in prompt entries, particularly in complex multi-value selections and naming conventions (e.g., specifying the correct Generali legal entity).
+
+✅ Faster Closing & Deadline Adherence
+
+Frees up controllers during peak periods, enabling a faster and smoother financial closing process.
+
+Minimizes delays, ensuring critical business deadlines are met.
+
+✅ Improved Employee Satisfaction
+
+Eliminates a monotonous and frustrating task, allowing employees to focus on more strategic activities.
+
+Prevents unnecessary laptop downtime during each manual report run.
+
+✅ Optimized System Utilization
+
+Automation enables reports to be scheduled at 3 AM, immediately after the Tagetik GHO load, ensuring:
+
+Faster load times due to minimal system activity.
+
+Reduced system strain during business hours, keeping resources available for other critical tasks.
+
+Conclusion
+
+By implementing Robotic Process Automation (RPA) for Tagetik report generation, FinCo will achieve:
+
+Greater efficiency and accuracy in financial reporting,
+
+Significant time and cost savings,
+
+Enhanced employee satisfaction and productivity, and
+
+Optimized system performance and resource utilization.
+
+This automation initiative represents a low-risk, high-reward investment, unlocking additional automation opportunities in financial reporting and beyond. Approval is recommended to proceed with implementation.
+
 

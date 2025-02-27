@@ -1,3 +1,11 @@
+Option 1: Use a Portable Version of Visual Studio
+🔹 Visual Studio does not officially offer a portable version, but you might be able to use a pre-installed copy of Visual Studio Community 2017 or 2019 from another machine by copying the installation folder. This method is not guaranteed to work, but you can try:
+
+Copy the installed Visual Studio folder from another machine where SSDT is working.
+Paste it into your local user folder (e.g., C:\Users\YourUser\VS2017).
+Run devenv.exe from the copied folder.
+👉 Downside: This might not work fully since Visual Studio requires registry entries.
+
 https://docs.google.com/document/d/10OaotNFz1gG1bB7ICTxjsScGlSDuH4qAI8JjU0EkuJg/edit?usp=sharing
 
 Management Summary: Robotic Process Automation for Tagetik Reports

@@ -1,3 +1,18 @@
+File Storage: Centralize Excel workbooks on a network share or SharePoint library.
+
+SSIS Package Development:
+
+File Detection: Implement a Foreach Loop Container to iterate through Excel files.
+Data Extraction: Use Excel Source components to read data.
+Data Loading: Transfer data into SQL Server staging tables.
+Data Transformation: Apply necessary transformations to prepare data for SAP BW.
+Data Transfer to SAP BW: Utilize the SAP BW Destination component in SSIS to load data into SAP BW.
+
+Automation: Schedule the SSIS package execution using SQL Server Agent for regular processing.
+
+Monitoring and Logging: Implement logging mechanisms to track the process flow and handle errors.
+
+********
 Option 1: Use a Portable Version of Visual Studio
 🔹 Visual Studio does not officially offer a portable version, but you might be able to use a pre-installed copy of Visual Studio Community 2017 or 2019 from another machine by copying the installation folder. This method is not guaranteed to work, but you can try:
 

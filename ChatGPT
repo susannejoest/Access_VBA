@@ -1,94 +1,58 @@
-File Storage: Centralize Excel workbooks on a network share or SharePoint library.
+please Change this code to work with the Oracle Client Tools Version 19:
 
-SSIS Package Development:
+Sub Orchestrator() ' v002
 
-File Detection: Implement a Foreach Loop Container to iterate through Excel files.
-Data Extraction: Use Excel Source components to read data.
-Data Loading: Transfer data into SQL Server staging tables.
-Data Transformation: Apply necessary transformations to prepare data for SAP BW.
-Data Transfer to SAP BW: Utilize the SAP BW Destination component in SSIS to load data into SAP BW.
+'Init variables
+Dim Toolwb As Workbook: Set Toolwb = ThisWorkbook
+Dim WS_Que As Worksheet: Set WS_Que = Toolwb.Worksheets("Query")
 
-Automation: Schedule the SSIS package execution using SQL Server Agent for regular processing.
+' Remove all the filters
+WS_Que.AutoFilterMode = False
 
-Monitoring and Logging: Implement logging mechanisms to track the process flow and handle errors.
+Dim DBQarray, SETarray, COMarray(10) As Variant
+Dim Target_t, User_UID, Server_O, Key_Quer, Strg_COM(10) As String
+WS_Que.Activate
 
-********
-Option 1: Use a Portable Version of Visual Studio
-🔹 Visual Studio does not officially offer a portable version, but you might be able to use a pre-installed copy of Visual Studio Community 2017 or 2019 from another machine by copying the installation folder. This method is not guaranteed to work, but you can try:
+'''Clear
+'For Each Object In ActiveSheet.ListObjects
+'    Object.Delete
+'Next Object
+Range("A14:Z1000").Value = ""
 
-Copy the installed Visual Studio folder from another machine where SSDT is working.
-Paste it into your local user folder (e.g., C:\Users\YourUser\VS2017).
-Run devenv.exe from the copied folder.
-👉 Downside: This might not work fully since Visual Studio requires registry entries.
+'Init query
+Key_Quer = Range("B3").Value
+Server_O = Range("B7").Value
+User_UID = Range("B8").Value
+Target_t = Range("B9").Value
+DBQarray = Array("ODBC;DRIVER={Oracle in OraClient12Home1_32bit};SERVER=" & Server_O & ";UID=" & User_UID & ";DBQ=TECH;DBA=W;APA=T;EXC=F;XSM=Default;FEN=T;QTO=T;FRC=10;FDL")
+'DBQarray = Array("ODBC;DRIVER={Oracle in OraClient12Home1_64bit};SERVER=" & Server_O & ";UID=" & User_UID & ";DBQ=TECH;DBA=W;APA=T;EXC=F;XSM=Default;FEN=T;QTO=T;FRC=10;FDL")
+SETarray = Array("=10;LOB=T;RST=T;BTD=F;BNF=F;BAM=IfAllSuccessful;NUM=NLS;DPM=F;MTS=T;MDI=Me;CSR=F;FWC=F;FBS=60000;TLO=O;MLD=0;ODA=F;STE=F;TSZ=819")
+TYParray = Array("2;")
 
-https://docs.google.com/document/d/10OaotNFz1gG1bB7ICTxjsScGlSDuH4qAI8JjU0EkuJg/edit?usp=sharing
+'Dachfonds1
+Strg_COM(0) = "Dachfonds 1"
+COMarray(0) = Array("SELECT anfo_anlagefondsnummer ""Fondsnr"",anfo_bezeichnung ""Fondsname"" from anlagefonds, basketpositionen, " _
+                , "te_anlagefondsinventare partition(colt_part_" & Target_t & ") where  anfo_instanz = bpos_anfo_instanz_basket and anfo_instanz =" _
+                , "teai_anfo_instanz and anfo_bezeichnung not LIKE '%OUT%' group by anfo_anlagefondsnummer, anfo_bezeichnung ORDER BY", " 1")
 
-Management Summary: Robotic Process Automation for Tagetik Reports
+'Loop query table
+With ActiveSheet.ListObjects.Add(SourceType:=0, Source:=Array(DBQarray, SETarray, TYParray), Destination:=Range("J4")).QueryTable
+    For n = 0 To UBound(COMarray) - 1
+        Progress = Progress + 1
+        .CommandText = COMarray(n)
+        .BackgroundQuery = True
+        .SaveData = True
+        .Refresh BackgroundQuery:=False
+        Pos1 = ActiveSheet.Cells(ActiveSheet.Rows.Count, "J").End(xlUp).Row + 2
+        Pos2 = ActiveSheet.Cells(ActiveSheet.Rows.Count, "B").End(xlUp).Row + 2
+        Pos3 = ActiveSheet.Cells(ActiveSheet.Rows.Count, "B").End(xlUp).Row + ActiveSheet.Cells(ActiveSheet.Rows.Count, "J").End(xlUp).Row + 1
+        Range("B" & Pos2 & ":" & "I" & Pos3).Value = Range("J3:" & "P" & Pos1).Value
+        Range("A" & Pos2 & ":" & "A" & Pos3 - 2).Value = Strg_COM(n)
+    Next n
+End With
 
-1. Process Description / Problem Statement
+'Exit
+Range("I1:Z3000").Value = ""
+Columns("A:Z").ColumnWidth = 8.43
 
-The current process of running Tagetik reports is highly repetitive, time-consuming, and prone to human error. Key challenges include:
-
-Reports need to be generated 30-40 times per year, with significantly higher frequency during the planning phase (up to 1-2 times per day for certain reports).
-
-Many reports require execution in multiple variants (e.g., per legal entity, different currency types), increasing manual workload.
-
-During financial closing periods, reports must be run multiple times per day, precisely when time is most critical and deadlines are tight.
-
-Stakeholders rely on these reports to be ready before the start of their workday, meaning any delay disrupts dependent workflows.
-
-Running a single report requires up to 9 manual prompts, some involving multiple selections, which is both time-consuming and error-prone.
-
-The process is entirely digital, repetitive, and rule-based, making it an ideal candidate for automation.
-
-Additional monthly closing processes could also benefit from automation, unlocking even greater efficiency gains.
-
-2. Key Objectives / Benefits
-
-Implementing Robotic Process Automation (RPA) for Tagetik report generation will provide the following benefits:
-
-✅ Significant Time & Cost Savings
-
-Automating the process will eliminate 2.5 hours per run spent on clearance and management reports alone.
-
-Controllers can focus on high-value tasks rather than repetitive data extraction.
-
-✅ Error-Free Execution
-
-Eliminates manual errors in prompt entries, particularly in complex multi-value selections and naming conventions (e.g., specifying the correct Generali legal entity).
-
-✅ Faster Closing & Deadline Adherence
-
-Frees up controllers during peak periods, enabling a faster and smoother financial closing process.
-
-Minimizes delays, ensuring critical business deadlines are met.
-
-✅ Improved Employee Satisfaction
-
-Eliminates a monotonous and frustrating task, allowing employees to focus on more strategic activities.
-
-Prevents unnecessary laptop downtime during each manual report run.
-
-✅ Optimized System Utilization
-
-Automation enables reports to be scheduled at 3 AM, immediately after the Tagetik GHO load, ensuring:
-
-Faster load times due to minimal system activity.
-
-Reduced system strain during business hours, keeping resources available for other critical tasks.
-
-Conclusion
-
-By implementing Robotic Process Automation (RPA) for Tagetik report generation, FinCo will achieve:
-
-Greater efficiency and accuracy in financial reporting,
-
-Significant time and cost savings,
-
-Enhanced employee satisfaction and productivity, and
-
-Optimized system performance and resource utilization.
-
-This automation initiative represents a low-risk, high-reward investment, unlocking additional automation opportunities in financial reporting and beyond. Approval is recommended to proceed with implementation.
-
-
+End Sub

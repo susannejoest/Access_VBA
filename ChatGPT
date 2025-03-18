@@ -1,38 +1,40 @@
+To ensure that your VBA code does not require a reference to OraOLEDB12.dll (which is a common issue when using early binding), we can modify it to use late binding. Late binding allows your VBA script to dynamically create the required database connection objects at runtime without needing a pre-set reference to OraOLEDB12.dll.
 
-please also convert this code so that it does not require a reference to C:\app\oracle\product\12.1.0\client_1\bin\OraOLEDB12.dll
-For Each Object In ActiveSheet.ListObjects
-        Object.Delete
-    Next Object
 
-********
 
-Sub Orchestrator_Oracle19() ' v003
+Sub Orchestrator_Oracle19_NoRef() ' v004
 
     ' Init variables
     Dim Toolwb As Workbook: Set Toolwb = ThisWorkbook
     Dim WS_Que As Worksheet: Set WS_Que = Toolwb.Worksheets("Query")
     
-    ' Remove all the filters
+    ' Remove all filters
     WS_Que.AutoFilterMode = False
     
+    ' Clear all existing tables dynamically without requiring a reference
+    Dim objList As ListObject
+    On Error Resume Next ' In case there are no tables
+    For Each objList In WS_Que.ListObjects
+        objList.Delete
+    Next objList
+    On Error GoTo 0
+
+    ' Clear previous data
+    WS_Que.Range("A14:Z1000").Value = ""
+
+    ' Init query variables
     Dim DBConnection As Object
     Dim DBRecordset As Object
-    Dim Target_t, User_UID, Server_O, Password, Key_Quer, SQL_Query As String
-    Dim ConnString As String
+    Dim Target_t As String, User_UID As String, Server_O As String, Password As String, Key_Quer As String
+    Dim ConnString As String, SQL_Query As String
     
-    WS_Que.Activate
+    Key_Quer = WS_Que.Range("B3").Value
+    Server_O = WS_Que.Range("B7").Value
+    User_UID = WS_Que.Range("B8").Value
+    Password = WS_Que.Range("B10").Value ' Assuming password is stored in B10
+    Target_t = WS_Que.Range("B9").Value
     
-    ' Clear previous data
-    Range("A14:Z1000").Value = ""
-    
-    ' Init query variables
-    Key_Quer = Range("B3").Value
-    Server_O = Range("B7").Value
-    User_UID = Range("B8").Value
-    Password = Range("B10").Value  ' Assuming password is stored in B10
-    Target_t = Range("B9").Value
-    
-    ' Define the connection string for Oracle 19c OLE DB
+    ' Define the connection string using Oracle OLE DB Provider
     ConnString = "Provider=OraOLEDB.Oracle;Data Source=" & Server_O & ";User ID=" & User_UID & ";Password=" & Password & ";"
     
     ' Define SQL query
@@ -44,8 +46,8 @@ Sub Orchestrator_Oracle19() ' v003
                 "AND anfo_bezeichnung NOT LIKE '%OUT%' " & _
                 "GROUP BY anfo_anlagefondsnummer, anfo_bezeichnung " & _
                 "ORDER BY 1"
-    
-    ' Create connection
+
+    ' Create connection using late binding
     Set DBConnection = CreateObject("ADODB.Connection")
     Set DBRecordset = CreateObject("ADODB.Recordset")
     
@@ -61,7 +63,7 @@ Sub Orchestrator_Oracle19() ' v003
     Else
         MsgBox "No data returned from query.", vbInformation, "Oracle Query"
     End If
-    
+
     ' Close connection
     DBRecordset.Close
     DBConnection.Close
@@ -75,63 +77,3 @@ Sub Orchestrator_Oracle19() ' v003
 
 End Sub
 
-******
-
-please Change this code to work with the Oracle Client Tools Version 19:
-
-Sub Orchestrator() ' v002
-
-'Init variables
-Dim Toolwb As Workbook: Set Toolwb = ThisWorkbook
-Dim WS_Que As Worksheet: Set WS_Que = Toolwb.Worksheets("Query")
-
-' Remove all the filters
-WS_Que.AutoFilterMode = False
-
-Dim DBQarray, SETarray, COMarray(10) As Variant
-Dim Target_t, User_UID, Server_O, Key_Quer, Strg_COM(10) As String
-WS_Que.Activate
-
-'''Clear
-'For Each Object In ActiveSheet.ListObjects
-'    Object.Delete
-'Next Object
-Range("A14:Z1000").Value = ""
-
-'Init query
-Key_Quer = Range("B3").Value
-Server_O = Range("B7").Value
-User_UID = Range("B8").Value
-Target_t = Range("B9").Value
-DBQarray = Array("ODBC;DRIVER={Oracle in OraClient12Home1_32bit};SERVER=" & Server_O & ";UID=" & User_UID & ";DBQ=TECH;DBA=W;APA=T;EXC=F;XSM=Default;FEN=T;QTO=T;FRC=10;FDL")
-'DBQarray = Array("ODBC;DRIVER={Oracle in OraClient12Home1_64bit};SERVER=" & Server_O & ";UID=" & User_UID & ";DBQ=TECH;DBA=W;APA=T;EXC=F;XSM=Default;FEN=T;QTO=T;FRC=10;FDL")
-SETarray = Array("=10;LOB=T;RST=T;BTD=F;BNF=F;BAM=IfAllSuccessful;NUM=NLS;DPM=F;MTS=T;MDI=Me;CSR=F;FWC=F;FBS=60000;TLO=O;MLD=0;ODA=F;STE=F;TSZ=819")
-TYParray = Array("2;")
-
-'Dachfonds1
-Strg_COM(0) = "Dachfonds 1"
-COMarray(0) = Array("SELECT anfo_anlagefondsnummer ""Fondsnr"",anfo_bezeichnung ""Fondsname"" from anlagefonds, basketpositionen, " _
-                , "te_anlagefondsinventare partition(colt_part_" & Target_t & ") where  anfo_instanz = bpos_anfo_instanz_basket and anfo_instanz =" _
-                , "teai_anfo_instanz and anfo_bezeichnung not LIKE '%OUT%' group by anfo_anlagefondsnummer, anfo_bezeichnung ORDER BY", " 1")
-
-'Loop query table
-With ActiveSheet.ListObjects.Add(SourceType:=0, Source:=Array(DBQarray, SETarray, TYParray), Destination:=Range("J4")).QueryTable
-    For n = 0 To UBound(COMarray) - 1
-        Progress = Progress + 1
-        .CommandText = COMarray(n)
-        .BackgroundQuery = True
-        .SaveData = True
-        .Refresh BackgroundQuery:=False
-        Pos1 = ActiveSheet.Cells(ActiveSheet.Rows.Count, "J").End(xlUp).Row + 2
-        Pos2 = ActiveSheet.Cells(ActiveSheet.Rows.Count, "B").End(xlUp).Row + 2
-        Pos3 = ActiveSheet.Cells(ActiveSheet.Rows.Count, "B").End(xlUp).Row + ActiveSheet.Cells(ActiveSheet.Rows.Count, "J").End(xlUp).Row + 1
-        Range("B" & Pos2 & ":" & "I" & Pos3).Value = Range("J3:" & "P" & Pos1).Value
-        Range("A" & Pos2 & ":" & "A" & Pos3 - 2).Value = Strg_COM(n)
-    Next n
-End With
-
-'Exit
-Range("I1:Z3000").Value = ""
-Columns("A:Z").ColumnWidth = 8.43
-
-End Sub

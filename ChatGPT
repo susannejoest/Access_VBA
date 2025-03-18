@@ -1,3 +1,74 @@
+Sub Orchestrator_Oracle19() ' v003
+
+    ' Init variables
+    Dim Toolwb As Workbook: Set Toolwb = ThisWorkbook
+    Dim WS_Que As Worksheet: Set WS_Que = Toolwb.Worksheets("Query")
+    
+    ' Remove all the filters
+    WS_Que.AutoFilterMode = False
+    
+    Dim DBConnection As Object
+    Dim DBRecordset As Object
+    Dim Target_t, User_UID, Server_O, Password, Key_Quer, SQL_Query As String
+    Dim ConnString As String
+    
+    WS_Que.Activate
+    
+    ' Clear previous data
+    Range("A14:Z1000").Value = ""
+    
+    ' Init query variables
+    Key_Quer = Range("B3").Value
+    Server_O = Range("B7").Value
+    User_UID = Range("B8").Value
+    Password = Range("B10").Value  ' Assuming password is stored in B10
+    Target_t = Range("B9").Value
+    
+    ' Define the connection string for Oracle 19c OLE DB
+    ConnString = "Provider=OraOLEDB.Oracle;Data Source=" & Server_O & ";User ID=" & User_UID & ";Password=" & Password & ";"
+    
+    ' Define SQL query
+    SQL_Query = "SELECT anfo_anlagefondsnummer AS Fondsnr, anfo_bezeichnung AS Fondsname " & _
+                "FROM anlagefonds, basketpositionen, te_anlagefondsinventare " & _
+                "PARTITION(colt_part_" & Target_t & ") " & _
+                "WHERE anfo_instanz = bpos_anfo_instanz_basket " & _
+                "AND anfo_instanz = teai_anfo_instanz " & _
+                "AND anfo_bezeichnung NOT LIKE '%OUT%' " & _
+                "GROUP BY anfo_anlagefondsnummer, anfo_bezeichnung " & _
+                "ORDER BY 1"
+    
+    ' Create connection
+    Set DBConnection = CreateObject("ADODB.Connection")
+    Set DBRecordset = CreateObject("ADODB.Recordset")
+    
+    ' Open connection
+    DBConnection.Open ConnString
+    
+    ' Execute query
+    Set DBRecordset = DBConnection.Execute(SQL_Query)
+    
+    ' Paste results into Excel
+    If Not DBRecordset.EOF Then
+        WS_Que.Range("J4").CopyFromRecordset DBRecordset
+    Else
+        MsgBox "No data returned from query.", vbInformation, "Oracle Query"
+    End If
+    
+    ' Close connection
+    DBRecordset.Close
+    DBConnection.Close
+    Set DBRecordset = Nothing
+    Set DBConnection = Nothing
+    
+    ' Adjust formatting
+    Columns("A:Z").ColumnWidth = 8.43
+    
+    MsgBox "Query execution completed successfully!", vbInformation, "Oracle Query"
+
+End Sub
+
+******
+
 please Change this code to work with the Oracle Client Tools Version 19:
 
 Sub Orchestrator() ' v002

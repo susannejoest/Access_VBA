@@ -1,3 +1,11 @@
+
+please also convert this code so that it does not require a reference to C:\app\oracle\product\12.1.0\client_1\bin\OraOLEDB12.dll
+For Each Object In ActiveSheet.ListObjects
+        Object.Delete
+    Next Object
+
+********
+
 Sub Orchestrator_Oracle19() ' v003
 
     ' Init variables

@@ -1,79 +1,22 @@
-To ensure that your VBA code does not require a reference to OraOLEDB12.dll (which is a common issue when using early binding), we can modify it to use late binding. Late binding allows your VBA script to dynamically create the required database connection objects at runtime without needing a pre-set reference to OraOLEDB12.dll.
+Hi Raphael
 
+Heiko und ich haben uns mit Paolo Pastorelli getroffen. Sein Kompatibilitätsproblem war recht simpel. 
 
+•	Der VBA-Code war so geschrieben, dass ein Oracle-ODAC-Treiber verwendet wurde, der folgende Probleme hat
+•	Man kann nur entweder einen 32- oder 64-bit ODAC-Treiber haben aber nicht beides, also kein ‘nahtloser’ Übergang von 32 auf 64 bit möglich. 
+•	Weiterhin muss der ODAC-Treiber immer exakt dieselbe Version sein wie der Oracle-Treiber, also z.b. ODAC V12 funktioniert nur mit Oracle client V12.
+•	Im Company Portal gibt es nur die Oracle-Treiber, aber keinen ODAC-Treiber
+•	Die aktuarialen Datenbanken, zu denen verbunden wird, sind auf der Neuesten Oracle-Version 19 – einen alten V12 Treiber zu verwenden zu müssen, nur um den alten VBA Code nicht umschreiben zu müssen, ist also auch ein potentielles Sicherheitsrisiko. Dies könnte bei den anderen Problemfällen evtl ähnlich sein, dass wir eigentlich dort durch Verwendung alter Treiber etc. ebenfalls ein potentielles Sicherheitsproblem haben.
 
-Sub Orchestrator_Oracle19_NoRef() ' v004
+•	Eine Lösungsoption war also, den Code so umzuschreiben, dass kein ODAC mehr benötigt wird, sondern nur noch der Treiber, welcher ja im Unternehmensportal in 32- und 64-bit in der Neuesten Version V19 zur Verfügung steht. Dies habe ich kurz gemacht und der VBA-Code läuft auf 64-Bit, ohne ODAC.
+•	Heiko hatte aber dann die brilliante Idee, die Plandaten aus der aktuarialen Datenbank ins SAP zu laden. Damit hat sich nicht nur der Oracle-Treiber erledigt , sondern es hat einen grossen Mehrwert und ist eine grosse Arbeitserleichterung für Paolo, da die Abfrage nun sehr simpel ist, und er auch noch Ist- und Plandaten zusammen enthalten sind,die er dann nicht mehr kombinieren muss
+•	Vermutlich gibt es noch andere alte 32-Bit Com-Add-Ins wo die beste Lösung eigentlich SAP heissen würde
+•	Heiko berichtet weiterhin, dass oft im COM-Add-in im Header schlicht und einfach die 64-bit Deklaration für z.b. Windows API Variablen vergessen wurde, was ja leicht zu lösen ist  (z.B. Declare PtrSafe Function MessageBox Lib "user32" Alias "MessageBoxA" (ByVal hwnd As LongPtr, ByVal lpText As String, ByVal lpCaption As String, ByVal uType As Long)
 
-    ' Init variables
-    Dim Toolwb As Workbook: Set Toolwb = ThisWorkbook
-    Dim WS_Que As Worksheet: Set WS_Que = Toolwb.Worksheets("Query")
-    
-    ' Remove all filters
-    WS_Que.AutoFilterMode = False
-    
-    ' Clear all existing tables dynamically without requiring a reference
-    Dim objList As ListObject
-    On Error Resume Next ' In case there are no tables
-    For Each objList In WS_Que.ListObjects
-        objList.Delete
-    Next objList
-    On Error GoTo 0
+Könnte man dann einfach ein 32-Bit Excel via Citrix oder Azure zur Verfügung stellen? 
 
-    ' Clear previous data
-    WS_Que.Range("A14:Z1000").Value = ""
+Darauf könnte Paolo und alle anderen, die möglicherweise noch so alte Skripte haben, diese dann problemlos laufen lassen, und hätte auch gleichzeitig die 64-Bit Version verfügbar für alles Neue.
 
-    ' Init query variables
-    Dim DBConnection As Object
-    Dim DBRecordset As Object
-    Dim Target_t As String, User_UID As String, Server_O As String, Password As String, Key_Quer As String
-    Dim ConnString As String, SQL_Query As String
-    
-    Key_Quer = WS_Que.Range("B3").Value
-    Server_O = WS_Que.Range("B7").Value
-    User_UID = WS_Que.Range("B8").Value
-    Password = WS_Que.Range("B10").Value ' Assuming password is stored in B10
-    Target_t = WS_Que.Range("B9").Value
-    
-    ' Define the connection string using Oracle OLE DB Provider
-    ConnString = "Provider=OraOLEDB.Oracle;Data Source=" & Server_O & ";User ID=" & User_UID & ";Password=" & Password & ";"
-    
-    ' Define SQL query
-    SQL_Query = "SELECT anfo_anlagefondsnummer AS Fondsnr, anfo_bezeichnung AS Fondsname " & _
-                "FROM anlagefonds, basketpositionen, te_anlagefondsinventare " & _
-                "PARTITION(colt_part_" & Target_t & ") " & _
-                "WHERE anfo_instanz = bpos_anfo_instanz_basket " & _
-                "AND anfo_instanz = teai_anfo_instanz " & _
-                "AND anfo_bezeichnung NOT LIKE '%OUT%' " & _
-                "GROUP BY anfo_anlagefondsnummer, anfo_bezeichnung " & _
-                "ORDER BY 1"
+So hatte es meine vorherige Firma gemacht, vor ca 10 Jahren. Es wurde einige Monate vor dem 64-Bit Upgrade ein 32- und 64-Bit Excel via Citrix zur Verfügung gestellt, damit jeder seine Apps & Dokumente auf beiden Versionen testen konnte. 
 
-    ' Create connection using late binding
-    Set DBConnection = CreateObject("ADODB.Connection")
-    Set DBRecordset = CreateObject("ADODB.Recordset")
-    
-    ' Open connection
-    DBConnection.Open ConnString
-    
-    ' Execute query
-    Set DBRecordset = DBConnection.Execute(SQL_Query)
-    
-    ' Paste results into Excel
-    If Not DBRecordset.EOF Then
-        WS_Que.Range("J4").CopyFromRecordset DBRecordset
-    Else
-        MsgBox "No data returned from query.", vbInformation, "Oracle Query"
-    End If
-
-    ' Close connection
-    DBRecordset.Close
-    DBConnection.Close
-    Set DBRecordset = Nothing
-    Set DBConnection = Nothing
-    
-    ' Adjust formatting
-    Columns("A:Z").ColumnWidth = 8.43
-    
-    MsgBox "Query execution completed successfully!", vbInformation, "Oracle Query"
-
-End Sub
-
+Anstatt dass alle Mitarbeiter wegen den ‚Exoten‘ weiter 32-Bit nutzen müssen, können fast alle von 64-Bit profitieren. Und die Exoten wären gleichzeitig auch motiviert ihre 32-Bit Apps loszuweden, damit alles auf ihrem normalen Desktop läuft, und haben auch die Möglichkeit ihr Zeug selbst zu ‚migrieren‘ und testen, da sie sowohl das 64- als auch das 32- Bit Excel zur Verfügung haben. Der nächste Vorteil ist, dass ihr dann komplette Visibilität hättet, wieviele und welche Nutzer genau es noch sind, die noch Office 32-Bit nutzen, ist es nur Paolo, sind es noch 5 weitere?

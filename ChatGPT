@@ -1,24 +1,24 @@
-Hi Raphael,
+Hallo Raphael,
 
-Heiko and I met with Paolo Pastorelli to discuss his compatibility issue, which turned out to be relatively straightforward.
-	•	The VBA code was designed to use an Oracle ODAC driver, which has several limitations:
-	•	You can only have either a 32-bit or 64-bit ODAC driver installed, but not both. This means there’s no “seamless” transition between 32-bit and 64-bit.
-	•	The ODAC driver must match the exact version of the Oracle client (e.g., ODAC V12 only works with Oracle client V12).
-	•	The Company Portal only provides Oracle drivers, not ODAC drivers.
-	•	The actuarial databases, to which the system connects, use Oracle version 19. Using an older V12 driver to avoid rewriting the VBA code is a potential security risk. The same could apply to other cases where outdated drivers might pose a security threat.
+Heiko und ich haben uns mit Paolo Pastorelli getroffen, um sein Kompatibilitätsproblem zu besprechen, das sich als relativ einfach herausstellte.
+	•	Der VBA-Code war so geschrieben, dass ein Oracle ODAC-Treiber verwendet wurde, der mehrere Einschränkungen aufweist:
+	•	Es kann nur entweder ein 32-Bit- oder ein 64-Bit-ODAC-Treiber installiert sein, aber nicht beides. Es gibt also keinen „nahtlosen“ Übergang zwischen 32-Bit und 64-Bit.
+	•	Der ODAC-Treiber muss genau mit der Version des Oracle-Clients übereinstimmen (z. B. funktioniert ODAC V12 nur mit Oracle Client V12).
+	•	Im Company Portal gibt es nur Oracle-Treiber, aber keine ODAC-Treiber.
+	•	Die aktuarialen Datenbanken, mit denen verbunden wird, verwenden Oracle Version 19. Einen alten V12-Treiber zu verwenden, nur um den VBA-Code nicht umschreiben zu müssen, stellt ein potenzielles Sicherheitsrisiko dar. Dasselbe könnte auch für andere Fälle gelten, in denen veraltete Treiber ein Sicherheitsrisiko darstellen.
 
-One solution was to rewrite the code to eliminate the need for the ODAC driver, relying only on the driver provided in the Company Portal (available in both 32-bit and 64-bit versions for Oracle V19). I quickly implemented this, and the VBA code now runs on 64-bit without the ODAC driver.
+Eine Lösung war, den Code so umzuschreiben, dass der ODAC-Treiber nicht mehr benötigt wird, sondern nur noch der Treiber, der im Unternehmensportal (in 32-Bit- und 64-Bit-Versionen für Oracle V19) verfügbar ist. Ich habe dies schnell umgesetzt, und der VBA-Code läuft jetzt auf 64-Bit ohne den ODAC-Treiber.
 
-Heiko then had the brilliant idea of loading the plan data from the actuarial database directly into SAP. This not only solves the Oracle driver issue but also adds significant value, making the process much simpler for Paolo. Now, he can access both actual and planned data in one query, without having to combine them manually.
+Heiko hatte dann die brillante Idee, die Plandaten direkt aus der aktuarialen Datenbank in SAP zu laden. Das löst nicht nur das Oracle-Treiberproblem, sondern bietet auch erheblichen Mehrwert, da der Prozess für Paolo viel einfacher wird. Jetzt kann er sowohl Ist- als auch Plandaten in einer Abfrage abrufen, ohne diese manuell kombinieren zu müssen.
 
-There may be other legacy 32-bit COM add-ins where the best solution would be SAP as well. Heiko also mentioned that often the 64-bit declarations for Windows API variables in COM add-ins are simply missing, which is easy to fix (e.g., Declare PtrSafe Function MessageBox Lib "user32" Alias "MessageBoxA" (ByVal hwnd As LongPtr, ByVal lpText As String, ByVal lpCaption As String, ByVal uType As Long)).
+Es könnte auch andere ältere 32-Bit COM-Add-ins geben, bei denen die beste Lösung ebenfalls SAP wäre. Heiko erwähnte zudem, dass häufig die 64-Bit-Deklarationen für Windows-API-Variablen in COM-Add-ins einfach fehlen, was leicht zu beheben ist (z. B. Declare PtrSafe Function MessageBox Lib "user32" Alias "MessageBoxA" (ByVal hwnd As LongPtr, ByVal lpText As String, ByVal lpCaption As String, ByVal uType As Long)).
 
-Would it be possible to provide Paolo and others who might have similar old scripts with a 32-bit Excel version via Citrix or Azure?
+Wäre es möglich, Paolo und anderen, die möglicherweise noch solche alten Skripte haben, eine 32-Bit-Excel-Version über Citrix oder Azure zur Verfügung zu stellen?
 
-This way, they could continue using their legacy scripts while also having access to the 64-bit version for all new work.
+So könnten sie ihre alten Skripte weiterhin nutzen und gleichzeitig die 64-Bit-Version für alle neuen Arbeiten verwenden.
 
-My previous company did something similar about 10 years ago. They offered both 32-bit and 64-bit Excel via Citrix a few months before the 64-bit upgrade, so users could test their apps and documents on both versions.
+Mein früheres Unternehmen hatte vor etwa 10 Jahren etwas Ähnliches gemacht. Sie boten sowohl 32-Bit- als auch 64-Bit-Excel über Citrix an, einige Monate vor dem 64-Bit-Upgrade, sodass die Benutzer ihre Apps und Dokumente auf beiden Versionen testen konnten.
 
-Rather than forcing everyone to continue using 32-bit for legacy apps, most employees could benefit from 64-bit. At the same time, the legacy users would be encouraged to migrate their old apps so everything works on their regular desktops. They would have the chance to migrate and test their apps with both Excel versions.
+Anstatt alle Mitarbeiter weiterhin 32-Bit für alte Apps verwenden zu lassen, könnten die meisten von 64-Bit profitieren. Gleichzeitig würden die „Exoten“ motiviert, ihre alten Apps zu migrieren, damit alles auf ihren normalen Desktops läuft. Sie hätten die Möglichkeit, ihre Apps selbst zu migrieren und zu testen, da sie sowohl die 32-Bit- als auch die 64-Bit-Version von Excel zur Verfügung haben.
 
-The added benefit is that it would provide visibility into how many and which users are still using 32-bit Office. Is it just Paolo, or are there five others as well?
+Der zusätzliche Vorteil wäre, dass man einen vollständigen Überblick darüber hätte, wie viele und welche Nutzer noch 32-Bit-Office verwenden. Ist es nur Paolo oder gibt es noch fünf andere?

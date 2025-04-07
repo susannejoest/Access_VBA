@@ -4,6 +4,7 @@ Option Compare Database
     
 Public Function fctCreateEmail_Simple(strTo As String, strCC As String, strSubject As String, strBody As String, blnSend As Boolean, Optional strAttachment As String, Optional strPathNameSaveAs As String)
 
+'Microsoft Outlook 16.0 Library must be referenced!!
 
 On Error GoTo Error_fctCreateEmail_Simple
 
@@ -74,6 +75,15 @@ Error_fctCreateEmail_Simple:
     End Select
     
 End Function
+
+**********
+Declarations for Email variables
+        Dim strTo As String
+        Dim strCC As String
+        Dim strSubject As String
+        Dim strBody As String
+        Dim blnSend As Boolean
+************
 
 Public Function fctCreateEmail_MultipleRecipients(strTo, strToCount As Integer, strCC As Variant, strSubject As String, strBody As String, blnSend As Boolean, Optional strAttachment As String, Optional blnDisplay As Boolean, Optional strVotingOptions)
 'Dim strTo(10) As Variant

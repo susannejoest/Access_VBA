@@ -1,6 +1,7 @@
 ****************************************
 EXCEL APP - Create or get Excel App
 ****************************************
+Function fct_ExcelApp(strFilePath As String, xlWb As String)
 
     Set xlApp = GetObject(, "Excel.Application") ' must trap error 429 Excel not open
     If xlApp Is Nothing Then 'Excel not open
@@ -37,6 +38,8 @@ lblNextStep:
             Debug.Print ERR.Number & " " & ERR.Description
             Resume Next
     End Select
+
+End Function
 
 ************
 EXPORT EXCEL to Access?

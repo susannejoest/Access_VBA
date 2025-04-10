@@ -20,7 +20,7 @@ Function GetFormattedDate(strFormat As String, strMonth As String, Optional strD
     End Select
     
     Select Case strDay
-        Case Null ' First day is default
+        Case "" ' First day is default
             dtDay = DateSerial(Year(dtDate), Month(dtDate), 1)
         Case "FirstDay"
             dtDay = DateSerial(Year(dtDate), Month(dtDate), 1)

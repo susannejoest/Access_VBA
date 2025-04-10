@@ -14,7 +14,7 @@ Function GetFormattedDate(strFormat As String, strMonth As String, Optional strD
         Case "CurrentMonth"
             dtDate = Date
         Case "PreviousMonth"
-            dtDate = DateAdd(m, -1, Date)
+            dtDate = DateAdd("m", -1, Date)
         Case Else
             Stop
     End Select

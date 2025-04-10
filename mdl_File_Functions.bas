@@ -3,6 +3,31 @@ Option Compare Database
 Private Declare PtrSafe Function CopyFileA Lib "kernel32" (ByVal ExistingFileName As String, _
   ByVal NewFileName As String, ByVal FailIfExists As Long) As Long
 
+
+Function fct_CopyFile_IfExists(strFilePathSRC As String, strFileNameSRC As String, strFilePathDST As String, strFileNameDST As String, blnOverwrite As Boolean, blnCopyOnlyIfNotExists As Boolean)
+' 10-Apr-2025
+
+    Dim FSO As Object
+    
+    If FSO.FileExists(strFilePathDST & strFileNameDST) Then
+
+       If blnCopyOnlyIfNotExists Then 'blnCopyOnlyIfNotExists = True
+       
+            'do nothing
+            
+        Else: blnCopyOnlyIfNotExists = False
+        
+            FSO.CopyFile strFilePathSRC & strFileNameSRC, strFilePathDST & strFileNameDST
+            
+        End If
+        
+    End If
+    
+    Set FSO = Nothing
+    
+End Function
+
+
 Function fctChkMkDir(strRootPath As String, Optional datDate As Date, Optional strMode As String) As String
 
 On Error GoTo Error_fctChkMkDir
@@ -224,3 +249,4 @@ Function RenameFile(folderName As String, searchFileName As String, renameFileTo
  Next
 
 End Function
+

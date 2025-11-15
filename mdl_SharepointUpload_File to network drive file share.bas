@@ -1,7 +1,11 @@
 /* README */
 
-' This function only works if you are able to add the sharepoint site you want to upload to to your Trusted Sites List. 
+' This function Uploads a specific file from a local file share to Sharepoint
+' The function only works if 
+'1. you are able to add the sharepoint site you want to upload to to your Trusted Sites List 
 ' If your administrator has disabled this then the procedure won't work. Synched sharpeoint folders are also not an option, they do not work here.
+' OR
+'2. you still have the old Internet Explorer and can just map sharepoint sites out of the box
 
 /* FUNCTION */
 
@@ -55,4 +59,5 @@ Err_fct_UploadToSharepoint:
     End If
 
 End Function
+
 

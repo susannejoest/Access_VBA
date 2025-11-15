@@ -1,0 +1,117 @@
+/* Readme */
+' watches a specific folder and copies all files to a target folder with a specific date and file identifier suffix (currency name but anything works)
+' requires a MS Access form with a start and stop button, and two labels, lblLastRun + lblFileCount
+'WORKS even if regular file share mapping does not work due to not being able to add your own site to the trusted site list, and thus not being able to map a sharepoint drive letter
+'Uses Shell.Application.CopyHere → behaves like Explorer drag-and-drop, works with OneDrive-synced SharePoint folders.
+'✔ Silent overwrite (16 flag).
+'✔ Keeps your date folder archive logic.
+'✔ No need for mapping drives or Trusted Sites.
+
+/* Access VBA */
+
+Option Compare Database
+Option Explicit
+
+Dim ContinueLoop As Boolean
+
+Private Sub cmdStop_Click()
+    ContinueLoop = False
+    MsgBox "File monitoring stopped."
+    cmdStop.ForeColor = vbRed
+    cmdFileWatch.ForeColor = vbBlue
+End Sub
+
+Private Sub Form_Timer()
+    If ContinueLoop Then
+        Call MonitorFiles
+    End If
+End Sub
+
+Private Sub Form_Unload(Cancel As Integer)
+    ContinueLoop = False
+End Sub
+
+Sub MonitorFiles()
+    Dim fso As Object
+    Dim sourceFolder As String
+    Dim targetFolder As String
+    Dim file As Object
+    Dim dateFolder As String
+    Dim subFolderName As String
+    Dim fileCount As Long
+    
+    sourceFolder = "R:\Clearance\"
+    targetFolder = "C:\Users\me\xxx\Internal Team Site - Finance Reporting & Analytics - Dokumente\Downloads\" ' Local synced SharePoint folder
+    
+    Set fso = CreateObject("Scripting.FileSystemObject")
+    
+    ' Validate folders
+    If Not fso.FolderExists(sourceFolder) Then
+        MsgBox "Source folder not found: " & sourceFolder, vbCritical
+        Exit Sub
+    End If
+    
+    If Not fso.FolderExists(targetFolder) Then
+        MsgBox "Target folder not found or not synced: " & targetFolder, vbCritical
+        Exit Sub
+    End If
+    
+    fileCount = 0 ' Initialize counter
+    
+    ' Process files
+    For Each file In fso.GetFolder(sourceFolder).Files
+        ' Determine subfolder name based on file name suffix
+        If InStr(file.Name, "TIP_O") > 0 Then
+            subFolderName = Format(Date, "yyyy_mm_dd") & "_Clearance_TIP_O"
+        ElseIf InStr(file.Name, "TIP_CV") > 0 Then
+            subFolderName = Format(Date, "yyyy_mm_dd") & "_Clearance_TIP_CV"
+        Else
+            subFolderName = Format(Date, "yyyy_mm_dd") & "_Clearance"
+        End If
+        
+        ' Full path for date-based folder in destination
+        dateFolder = targetFolder & subFolderName & "\"
+        
+        ' Create folder if it doesn't exist
+        If Dir(dateFolder, vbDirectory) = "" Then
+            MkDir dateFolder
+        End If
+        
+        ' Copy file to destination subfolder
+        On Error Resume Next
+        fso.CopyFile file.Path, dateFolder & file.Name, True
+        
+        If Err.Number = 0 Then
+            fileCount = fileCount + 1 ' Increment counter only if copy succeeded
+        End If
+
+        If Err.Number <> 0 Then
+            MsgBox "Error copying file: " & file.Name & vbCrLf & Err.Description, vbExclamation
+            Err.Clear
+        End If
+        On Error GoTo 0
+        
+
+        Me.lblLastRun.Caption = "Last run: " & Format(Now, "yyyy-mm-dd hh:nn:ss")
+        Me.lblFileCount.Caption = "Files copied: " & fileCount
+
+    Next file
+End Sub
+
+Private Sub cmdFileWatch_Click()
+    ContinueLoop = True
+    MonitorFiles
+    cmdFileWatch.ForeColor = vbGreen
+    cmdStop.ForeColor = vbBlue
+        Me.lblLastRun.Caption = "Last run: " & Format(Now, "yyyy-mm-dd hh:nn:ss")
+End Sub
+
+Sub StartFileMonitor()
+    ContinueLoop = True
+    MonitorFiles
+End Sub
+
+Sub StopFileMonitor()
+    ContinueLoop = False
+    MsgBox "File monitoring stopped."
+End Sub

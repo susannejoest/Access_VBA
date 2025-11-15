@@ -6,6 +6,7 @@
 ' If your administrator has disabled this then the procedure won't work. Synched sharpeoint folders are also not an option, they do not work here.
 ' OR
 '2. you still have the old Internet Explorer and can just map sharepoint sites out of the box
+' alternatively you can use the approach in my other file copy procedure, which bypasses these issues: CopyFileLocalShareToSharepointWithTimerLoop
 
 /* FUNCTION */
 
@@ -59,5 +60,6 @@ Err_fct_UploadToSharepoint:
     End If
 
 End Function
+
 
 

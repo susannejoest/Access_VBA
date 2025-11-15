@@ -1,9 +1,19 @@
+/* README */
+
+' This function only works if you are able to add the sharepoint site you want to upload to to your Trusted Sites List. 
+' If your administrator has disabled this then the procedure won't work. Synched sharpeoint folders are also not an option, they do not work here.
+
+/* FUNCTION */
+
 'Attribute VB_Name = "mdl_SharepointUpload"
 'Option Compare Database
 
 Public Function fct_UploadToSharepoint(strSourcePathAndFullFileName As String, strTargetFileNameNoPath As String, strSharepointUploadLibraryAddress As String) As Boolean
+' strSourcePathAndFullFileName = full file path and name, e.g. "R:\FIN_Reporting_Analytics\Tagetik\Tagetik_Report_Download\Clearance\Report1.xlsx"
+' strTargetFileNameNoPath = Target file name in Sharepoint, e.g. Report1.xlsx
+' strSharepointUploadLibraryAddress = sharepoint site to upload to, e.g. \\my.sharepoint.com@SSL\DavWWWRoot\sites\mysite\Shared Documents\"
 
-'file share A: is temporarily mapped as a workaround
+'file share A: is temporarily mapped as a workaround (only works if you are able to map sharepoint sites as file shares, if it is not disabled)
 
 On Error GoTo Err_fct_UploadToSharepoint
     Dim objNet As Object 'CreateObject("WScript.Network")
@@ -45,3 +55,4 @@ Err_fct_UploadToSharepoint:
     End If
 
 End Function
+

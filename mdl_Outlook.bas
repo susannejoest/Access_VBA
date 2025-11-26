@@ -76,14 +76,14 @@ Error_fctCreateEmail_Simple:
     
 End Function
 
-**********
-Declarations for Email variables
-        Dim strTo As String
-        Dim strCC As String
-        Dim strSubject As String
-        Dim strBody As String
-        Dim blnSend As Boolean
-************
+'**********
+'Declarations for Email variables
+'        Dim strTo As String
+'        Dim strCC As String
+'        Dim strSubject As String
+'        Dim strBody As String
+'        Dim blnSend As Boolean
+'************
 
 Public Function fctCreateEmail_MultipleRecipients(strTo, strToCount As Integer, strCC As Variant, strSubject As String, strBody As String, blnSend As Boolean, Optional strAttachment As String, Optional blnDisplay As Boolean, Optional strVotingOptions)
 'Dim strTo(10) As Variant
@@ -264,4 +264,5 @@ Private Sub cmdCreateEmail_TemplateCode()
     Call fctCreateEmail_MultipleRecipients(strTo, intcount, strCC, strSubject, strBody, blnSend, , True, strVotingOptions)
 
 End Sub
+
 

@@ -1,0 +1,293 @@
+Option Compare Database
+Option Explicit
+
+
+Private Const CONVERSION_MARKER As String = "_CHF_MILLIONS_CONVERTED"
+Private Const MILLION_DIVISOR As Double = 1000000#
+
+
+
+Public Function fct_ConvertExcelToMillions(ByVal fullFilePath As String)
+
+    Dim xlApp As Object
+    Dim wb As Object
+    Dim ws As Object
+    Dim rng As Object
+    Dim cell As Object
+    Dim nm As Object
+    Dim fileAlreadyConverted As Boolean
+
+    On Error GoTo ErrorHandler
+
+    'Check file exists
+    If Len(Dir(fullFilePath)) = 0 Then
+        ERR.Raise vbObjectError + 1000, , _
+                  "File not found: " & fullFilePath
+    End If
+Dim xlWasAlreadyOpen As Boolean
+
+
+On Error Resume Next
+Set xlApp = GetObject(, "Excel.Application")
+On Error GoTo ErrorHandler
+
+If xlApp Is Nothing Then
+    Set xlApp = CreateObject("Excel.Application")
+    xlWasAlreadyOpen = False
+Else
+    xlWasAlreadyOpen = True
+End If
+
+    xlApp.Visible = True
+xlApp.WindowState = -4137   'xlNormal
+
+    'xlApp.DisplayAlerts = False
+    'xlApp.ScreenUpdating = False
+    'xlApp.EnableEvents = False
+
+    Set wb = xlApp.Workbooks.Open(fullFilePath)
+wb.Activate
+
+If wb.Windows.Count > 0 Then
+    wb.Windows(1).Visible = True
+    wb.Windows(1).Activate
+End If
+    '-------------------------------------------------------
+    ' Check whether this workbook was already converted
+    '-------------------------------------------------------
+    fileAlreadyConverted = False
+
+    For Each nm In wb.Names
+        If nm.Name = CONVERSION_MARKER Then
+            fileAlreadyConverted = True
+            Exit For
+        End If
+    Next nm
+
+    If fileAlreadyConverted Then
+        wb.Close SaveChanges:=False
+        GoTo CleanExit
+    End If
+
+    '-------------------------------------------------------
+    ' Process every worksheet
+    '-------------------------------------------------------
+
+Dim processRange As Object
+Dim col As Object
+
+Dim replaceRange As Object
+
+Dim rowNum As Long
+Dim firstRow As Long
+Dim lastRow As Long
+
+For Each ws In wb.Worksheets
+
+    If ws.Name <> "1" And ws.Name <> "_TGK_HIDDEN" Then 'TOC / hidden sheet
+
+        Debug.Print ws.Name
+
+        'Show current worksheet during debugging
+        If xlApp.Visible Then
+            wb.Activate
+            ws.Activate
+            DoEvents
+        End If
+
+        '--------------------------------------------------
+        '1. Replace €m with CHFm
+        '   Only search used cells in column D
+        '--------------------------------------------------
+        Set replaceRange = xlApp.Intersect( _
+            ws.UsedRange, _
+            ws.Columns("D") _
+        )
+
+        If Not replaceRange Is Nothing Then
+
+            For Each cell In replaceRange.Cells
+
+                If Not cell.HasFormula Then
+
+                    If VarType(cell.Value) = vbString Then
+
+                        If InStr(1, cell.Value, "€m", vbBinaryCompare) > 0 Then
+                            cell.Value = Replace( _
+                                cell.Value, _
+                                "€m", _
+                                "CHFm" _
+                            )
+                        End If
+
+                    End If
+
+                End If
+
+            Next cell
+
+        End If
+
+
+        '--------------------------------------------------
+        '2. Restrict processing to UsedRange AND F:DD
+        '--------------------------------------------------
+        Set processRange = xlApp.Intersect( _
+            ws.UsedRange, _
+            ws.Range("F:DD") _
+        )
+
+        If Not processRange Is Nothing Then
+
+            '--------------------------------------------------
+            '3. Process one column at a time
+            '--------------------------------------------------
+            For Each col In processRange.Columns
+
+                'Skip hidden columns completely
+                If Not col.EntireColumn.Hidden Then
+
+                    'Skip completely empty columns
+                    If xlApp.WorksheetFunction.CountA(col) > 0 Then
+
+                        Debug.Print "Processing column: " & _
+                                    ws.Name & " " & _
+                                    col.Address
+
+                        'Initial AutoFit
+                        col.EntireColumn.AutoFit
+
+                        'Determine used rows for this column range
+                        firstRow = col.Row
+                        lastRow = col.Row + col.Rows.Count - 1
+
+                        '------------------------------------------
+                        '4. Process cells strictly top to bottom
+                        '   Hidden rows ARE included
+                        '------------------------------------------
+                        For rowNum = firstRow To lastRow
+
+                            Set cell = ws.Cells(rowNum, col.Column)
+
+                            If ShouldConvertCell(cell) Then
+
+                                Debug.Print ws.Name, cell.Address
+
+                                'Highlight converted cell pale yellow
+                                cell.Interior.Color = RGB(255, 255, 204)
+
+                                'Convert value to millions
+                                cell.Value = _
+                                    cell.Value / MILLION_DIVISOR
+
+                            End If
+
+                        Next rowNum
+
+                        '------------------------------------------
+                        '5. AutoFit again after conversion
+                        '------------------------------------------
+                        col.EntireColumn.AutoFit
+
+                    End If
+
+                End If
+
+            Next col
+
+        End If
+
+        Set replaceRange = Nothing
+        Set processRange = Nothing
+
+    End If
+
+Next ws
+
+    '-------------------------------------------------------
+    ' Add hidden marker so the workbook cannot be
+    ' accidentally converted a second time
+    '-------------------------------------------------------
+    wb.Names.Add _
+        Name:=CONVERSION_MARKER, _
+        RefersTo:="=TRUE", _
+        Visible:=False
+
+    wb.Save
+    wb.Close SaveChanges:=False
+
+CleanExit:
+
+    On Error Resume Next
+
+    If Not wb Is Nothing Then
+        wb.Close SaveChanges:=False
+    End If
+
+    If Not xlApp Is Nothing Then
+        xlApp.EnableEvents = True
+        xlApp.ScreenUpdating = True
+        xlApp.DisplayAlerts = True
+        xlApp.Quit
+    End If
+
+    Set cell = Nothing
+    Set rng = Nothing
+    Set ws = Nothing
+    Set wb = Nothing
+    Set xlApp = Nothing
+
+    Exit Function
+
+ErrorHandler:
+
+    Dim errorMessage As String
+
+    errorMessage = _
+        "Error converting Excel file:" & vbCrLf & vbCrLf & _
+        fullFilePath & vbCrLf & vbCrLf & _
+        ERR.Number & " - " & ERR.Description
+
+    On Error Resume Next
+
+    If Not wb Is Nothing Then
+        wb.Close SaveChanges:=False
+    End If
+
+    If Not xlApp Is Nothing Then
+        xlApp.EnableEvents = True
+        xlApp.ScreenUpdating = True
+        xlApp.DisplayAlerts = True
+        xlApp.Quit
+    End If
+
+    MsgBox errorMessage, vbCritical
+
+End Function
+
+
+Private Function ShouldConvertCell(ByVal cell As Object) As Boolean
+
+    ShouldConvertCell = False
+
+    'Do not modify cells in hidden rows
+    'If cell.EntireRow.Hidden Then Exit Function
+
+    'Do not modify cells in hidden columns - cannot skip hidden rows because e.g. PC net cor col 36 hidden used for calculation
+    If cell.EntireColumn.Hidden Then Exit Function
+
+    'Empty
+    If IsEmpty(cell.Value) Then Exit Function
+
+    'Do not modify formulas
+    If cell.HasFormula Then Exit Function
+
+    'Must be numeric
+    If Not IsNumeric(cell.Value) Then Exit Function
+
+    'Do not modify percentages
+    If InStr(1, cell.NumberFormat, "%", vbTextCompare) > 0 Then Exit Function
+
+    ShouldConvertCell = True
+
+End Function
